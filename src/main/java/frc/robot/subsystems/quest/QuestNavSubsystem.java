@@ -1,4 +1,4 @@
-package frc.robot.subsystems;
+package frc.robot.subsystems.quest;
 
 import static edu.wpi.first.units.Units.*;
 
@@ -21,7 +21,6 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.PoseFrame;
-import frc.robot.QuestNav;
 
 public class QuestNavSubsystem {
     QuestNav questNav = new QuestNav();

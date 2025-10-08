@@ -9,6 +9,7 @@
 package frc.robot;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import frc.robot.subsystems.quest.QuestNav;
 
 /**
  * A frame of data from the Quest.
