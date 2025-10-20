@@ -1,5 +1,8 @@
 package frc.robot.subsystems.quest;
 
+import java.util.OptionalDouble;
+import java.util.OptionalInt;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Transform2d;
 
@@ -14,9 +17,9 @@ public interface QuestIO extends AutoCloseable {
     /** Transform between QuestNav current and starting pose */
     public Transform2d uncorrectedResetToQuest = Transform2d.kZero;
 
-    public double timestamp = 0;
-    public double timestampDelta = 0;
-    public double batteryLevel = 0;
+    public OptionalDouble timestamp = OptionalDouble.empty();
+    public OptionalDouble timestampDelta = OptionalDouble.empty();
+    public OptionalInt batteryLevel = OptionalInt.empty();
   }
 
   public default void updateInputs(QuestIOInputs inputs) {}

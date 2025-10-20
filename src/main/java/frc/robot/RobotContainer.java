@@ -46,7 +46,7 @@ public class RobotContainer {
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
-    public final Quest quest;
+    public final Quest quest = new Quest(null);
 
     StructPublisher<Pose2d> posePublisher =
       NetworkTableInstance.getDefault().getStructTopic("robotPose", Pose2d.struct).publish();

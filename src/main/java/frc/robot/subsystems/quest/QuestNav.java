@@ -13,8 +13,12 @@ import static edu.wpi.first.units.Units.Milliseconds;
 import static edu.wpi.first.units.Units.Seconds;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.proto.Pose2dProto;
 import edu.wpi.first.math.proto.Geometry2D;
+import edu.wpi.first.networktables.DoubleSubscriber;
+import edu.wpi.first.networktables.FloatArraySubscriber;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.ProtobufPublisher;
@@ -103,6 +107,24 @@ public class QuestNav {
 
   /** Last processed response id */
   private int lastProcessedResponseId = 0; // Should be the same on the backend
+
+  /** Pose of quest when pose was reset */
+  private Pose2d uncorrectedResetPose = Pose2d.kZero;
+
+  /** Heading of quest when pose was reset */
+  private Rotation2d resetHeading = Rotation2d.kZero;
+
+  // Subscribe to the Network Tables questnav data topics
+  private DoubleSubscriber questTimestamp = questNavTable.getDoubleTopic("timestamp").subscribe(0.0f);
+  private FloatArraySubscriber questPosition =
+    questNavTable.getFloatArrayTopic("position").subscribe(new float[] {0.0f, 0.0f, 0.0f});
+  private FloatArraySubscriber questQuaternion =
+    questNavTable.getFloatArrayTopic("quaternion").subscribe(new float[] {0.0f, 0.0f, 0.0f, 0.0f});
+  private FloatArraySubscriber questEulerAngles =
+    questNavTable.getFloatArrayTopic("eulerAngles").subscribe(new float[] {0.0f, 0.0f, 0.0f});
+  private DoubleSubscriber questBatteryPercent =
+    questNavTable.getDoubleTopic("device/batteryPercent").subscribe(0.0f);
+
 
   /** Creates a new QuestNav implementation */
   public QuestNav() {}
@@ -254,5 +276,24 @@ public class QuestNav {
       // don't double process
       lastProcessedResponseId = latestCommandResponse.getCommandId();
     }
+  }
+
+  // Get the yaw Euler angle of the headset
+  private Rotation2d getUncorrectedYaw() {
+    float[] eulerAngles = questEulerAngles.get();
+    return Rotation2d.fromDegrees(-Math.IEEEremainder(eulerAngles[1], 360.0)).minus(resetHeading);
+  }
+
+  private Translation2d getUncorrectedTranslation() {
+    float[] position = questPosition.get();
+    return new Translation2d(position[2], -position[0]);
+  }
+
+  public Pose2d getUncorrectedPose() {
+    return new Pose2d(getUncorrectedTranslation().rotateBy(resetHeading), getUncorrectedYaw());
+  }
+
+  public Pose2d getUncorrectedResetPose() {
+    return this.uncorrectedResetPose;
   }
 }
