@@ -6,18 +6,24 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.*;
 
+import java.util.OptionalInt;
+
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
 import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructPublisher;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -28,6 +34,7 @@ import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.quest.Quest;
 import frc.robot.subsystems.quest.QuestIO;
 import frc.robot.subsystems.quest.QuestIOReal;
+import frc.robot.subsystems.quest.QuestNav;
 
 public class RobotContainer {
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
@@ -46,10 +53,15 @@ public class RobotContainer {
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
-    public final Quest quest = new Quest(null);
-
-    StructPublisher<Pose2d> posePublisher =
-      NetworkTableInstance.getDefault().getStructTopic("robotPose", Pose2d.struct).publish();
+    public final QuestNav questNav = new QuestNav();
+    Transform3d ROBOT_TO_QUEST = new Transform3d( /*TODO: Put your x, y, z, yaw, pitch, and roll offsets here!*/ );
+    Matrix<N3, N1> QUESTNAV_STD_DEVS =
+    VecBuilder.fill(
+        0.02, // Trust down to 2cm in X direction
+        0.02, // Trust down to 2cm in Y direction
+        0.035 // Trust down to 2 degrees rotational
+    );
+    
     StructPublisher<Pose2d> questPosePublisher =
       NetworkTableInstance.getDefault().getStructTopic("questPose", Pose2d.struct).publish();
 
@@ -85,6 +97,7 @@ public class RobotContainer {
         joystick.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
         drivetrain.registerTelemetry(logger::telemeterize);
+        
     }
 
     public Command getAutonomousCommand() {
@@ -93,6 +106,26 @@ public class RobotContainer {
 
     public void periodic() {
         // add robot-wide periodic code here
-        
+        if (questNav.isTracking()) {
+        // Get the latest pose data frames from the Quest
+        PoseFrame[] questFrames = questNav.getAllUnreadPoseFrames();
+
+        // Loop over the pose data frames and send them to the pose estimator
+        for (PoseFrame questFrame : questFrames) {
+            // Get the pose of the Quest
+            Pose2d questPose = questFrame.questPose();
+            // Get timestamp for when the data was sent
+            double timestamp = questFrame.dataTimestamp();
+
+            // Transform by the mount pose to get your robot pose
+            Pose3d robotPose = questPose.transformBy(QuestNavConstants.ROBOT_TO_QUEST.inverse());
+
+            // You can put some sort of filtering here if you would like!
+
+            // Add the measurement to our estimator
+            drivetrain.addVisionMeasurement(robotPose.toPose2d(), timestamp, QUESTNAV_STD_DEVS);
+        }
+    }
+
     }
 }
