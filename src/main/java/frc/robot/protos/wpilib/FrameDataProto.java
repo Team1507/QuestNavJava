@@ -26,12 +26,12 @@ public class FrameDataProto
   }
 
   @Override
-  public frc.robot.generated.Data.ProtobufQuestNavFrameData createMessage() {
+  public Data.ProtobufQuestNavFrameData createMessage() {
     return Data.ProtobufQuestNavFrameData.newInstance();
   }
 
   @Override
-  public frc.robot.generated.Data.ProtobufQuestNavFrameData unpack(Data.ProtobufQuestNavFrameData msg) {
+  public Data.ProtobufQuestNavFrameData unpack(Data.ProtobufQuestNavFrameData msg) {
     return msg.clone();
   }
 

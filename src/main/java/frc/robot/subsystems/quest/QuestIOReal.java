@@ -7,8 +7,6 @@ public class QuestIOReal implements QuestIO {
   public void updateInputs(QuestIOInputs inputs) {
     inputs.connected = questNav.isConnected();
 
-    inputs.uncorrectedPose = questNav.getUncorrectedPose();
-    inputs.uncorrectedResetPose = questNav.getUncorrectedResetPose();
     inputs.uncorrectedResetToQuest = inputs.uncorrectedPose.minus(inputs.uncorrectedResetPose);
   }
 }

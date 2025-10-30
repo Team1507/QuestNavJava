@@ -27,12 +27,12 @@ public class CommandResponseProto
   }
 
   @Override
-  public frc.robot.generated.Commands.ProtobufQuestNavCommandResponse createMessage() {
+  public Commands.ProtobufQuestNavCommandResponse createMessage() {
     return Commands.ProtobufQuestNavCommandResponse.newInstance();
   }
 
   @Override
-  public frc.robot.generated.Commands.ProtobufQuestNavCommandResponse unpack(
+  public Commands.ProtobufQuestNavCommandResponse unpack(
       Commands.ProtobufQuestNavCommandResponse msg) {
     return msg.clone();
   }

@@ -26,12 +26,12 @@ public class DeviceDataProto
   }
 
   @Override
-  public frc.robot.generated.Data.ProtobufQuestNavDeviceData createMessage() {
+  public Data.ProtobufQuestNavDeviceData createMessage() {
     return Data.ProtobufQuestNavDeviceData.newInstance();
   }
 
   @Override
-  public frc.robot.generated.Data.ProtobufQuestNavDeviceData unpack(Data.ProtobufQuestNavDeviceData msg) {
+  public Data.ProtobufQuestNavDeviceData unpack(Data.ProtobufQuestNavDeviceData msg) {
     return msg.clone();
   }
 
