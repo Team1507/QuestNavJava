@@ -36,6 +36,7 @@ import frc.robot.subsystems.quest.Quest;
 import frc.robot.subsystems.quest.QuestIO;
 import frc.robot.subsystems.quest.QuestIOReal;
 import frc.robot.subsystems.quest.QuestNav;
+import frc.robot.subsystems.quest.QuestNavSubsystem;
 
 public class RobotContainer {
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
@@ -54,17 +55,7 @@ public class RobotContainer {
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
-    public final QuestNav questNav = new QuestNav();
-    Transform3d ROBOT_TO_QUEST = new Transform3d(0.381, 0.0, 0.3048, new Rotation3d(0.0,0.0,0.0));
-    Matrix<N3, N1> QUESTNAV_STD_DEVS =
-    VecBuilder.fill(
-        0.02, // Trust down to 2cm in X direction
-        0.02, // Trust down to 2cm in Y direction
-        0.035 // Trust down to 2 degrees rotational
-    );
-    
-    StructPublisher<Pose2d> questPosePublisher =
-      NetworkTableInstance.getDefault().getStructTopic("questPose", Pose2d.struct).publish();
+    public final QuestNavSubsystem questNavSubsystem = new QuestNavSubsystem();
 
     public RobotContainer() {
         configureBindings();
@@ -97,8 +88,7 @@ public class RobotContainer {
         // reset the field-centric heading on left bumper press
         joystick.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
-        drivetrain.registerTelemetry(logger::telemeterize);
-        
+        drivetrain.registerTelemetry(logger::telemeterize);    
     }
 
     public Command getAutonomousCommand() {
@@ -107,26 +97,5 @@ public class RobotContainer {
 
     public void periodic() {
         // add robot-wide periodic code here
-        if (questNav.isTracking()) {
-        // Get the latest pose data frames from the Quest
-        PoseFrame[] questFrames = questNav.getAllUnreadPoseFrames();
-
-        // Loop over the pose data frames and send them to the pose estimator
-        for (PoseFrame questFrame : questFrames) {
-            // Get the pose of the Quest
-            Pose3d questPose = questFrame.questPose3d();
-            // Get timestamp for when the data was sent
-            double timestamp = questFrame.dataTimestamp();
-
-            // Transform by the mount pose to get your robot pose
-            Pose3d robotPose = questPose.transformBy(ROBOT_TO_QUEST.inverse());
-
-            // You can put some sort of filtering here if you would like!
-
-            // Add the measurement to our estimator
-            drivetrain.addVisionMeasurement(robotPose.toPose2d(), timestamp, QUESTNAV_STD_DEVS);
-        }
-    }
-
     }
 }
