@@ -90,4 +90,22 @@ public class QuestNavSubsystem extends SubsystemBase {
     public OptionalDouble getAppTimestamp() {
         return questNav.getAppTimestamp();
     }
+
+    public void setDrivetrainPose(){
+        /*
+         * This function will reset the current pose of the
+         * drivetrain to the latest pose acquired from the
+         * QuestNav system.
+         */
+        drivetrain.resetPose(latestPose);
+    }
+
+    public void setQuestNavPose(Pose3d pose){
+        /*
+         * The function will take in a 3D pose and set the
+         * QuestNav pose to that pose. Useful if integrating
+         * PhotonVision or another outside source.
+         */
+        questNav.setPose(pose);
+    }
 }
