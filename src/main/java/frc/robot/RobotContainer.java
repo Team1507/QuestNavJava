@@ -14,9 +14,14 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
+//Robot Constants
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
-import frc.robot.subsystems.quest.QuestNavSubsystem;
+import frc.robot.subsystems.QuestNavSubsystem;
+import frc.robot.utilities.Telemetry;
+
+import static frc.robot.Constants.IO.*;
+import static frc.robot.Constants.Drive.*;
 
 public class RobotContainer {
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
@@ -31,10 +36,10 @@ public class RobotContainer {
 
     private final Telemetry logger = new Telemetry(MaxSpeed);
 
-    private final CommandXboxController joystick = new CommandXboxController(0);
+    private final CommandXboxController joystick = new CommandXboxController(JOYSTICK_PORT);
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
-    public final QuestNavSubsystem questNavSubsystem = new QuestNavSubsystem(drivetrain);
+    public final QuestNavSubsystem questNavSubsystem = new QuestNavSubsystem(drivetrain, logger);
 
     public RobotContainer() {
         configureBindings();
@@ -46,9 +51,9 @@ public class RobotContainer {
         drivetrain.setDefaultCommand(
             // Drivetrain will execute this command periodically
             drivetrain.applyRequest(() ->
-                drive.withVelocityX((-joystick.getLeftY() * 0.15) * MaxSpeed) // Drive forward with negative Y (forward)
-                    .withVelocityY((-joystick.getLeftX() * 0.15) * MaxSpeed) // Drive left with negative X (left)
-                    .withRotationalRate((-joystick.getRightX() * 0.25) * MaxAngularRate) // Drive counterclockwise with negative X (left)
+                drive.withVelocityX((-joystick.getLeftY() * TRANSLATION_SCALE) * MaxSpeed) // Drive forward with negative Y (forward)
+                    .withVelocityY((-joystick.getLeftX() * TRANSLATION_SCALE) * MaxSpeed) // Drive left with negative X (left)
+                    .withRotationalRate((-joystick.getRightX() * ROTATION_SCALE) * MaxAngularRate) // Drive counterclockwise with negative X (left)
             )
         );
 
@@ -72,9 +77,5 @@ public class RobotContainer {
 
     public Command getAutonomousCommand() {
         return Commands.print("No autonomous command configured");
-    }
-
-    public void periodic() {
-        // add robot-wide periodic code here
     }
 }

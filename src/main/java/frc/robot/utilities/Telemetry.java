@@ -1,4 +1,4 @@
-package frc.robot;
+package frc.robot.utilities;
 
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.swerve.SwerveDrivetrain.SwerveDriveState;
@@ -51,6 +51,15 @@ public class Telemetry {
     private final DoubleArrayPublisher fieldPub = table.getDoubleArrayTopic("robotPose").publish();
     private final StringPublisher fieldTypePub = table.getStringTopic(".type").publish();
 
+    /* QuestNav */
+    private final StructPublisher<Pose2d> questPose =
+        inst.getTable("QuestNav").getStructTopic("Pose", Pose2d.struct).publish();
+
+    /** Publish QuestNav pose for debugging */
+    public void publishQuestPose(Pose2d pose) {
+        questPose.set(pose);
+    }
+
     /* Mechanisms to represent the swerve module states */
     private final Mechanism2d[] m_moduleMechanisms = new Mechanism2d[] {
         new Mechanism2d(1, 1),
@@ -80,15 +89,6 @@ public class Telemetry {
     private final double[] m_poseArray = new double[3];
     private final double[] m_moduleStatesArray = new double[8];
     private final double[] m_moduleTargetsArray = new double[8];
-
-    //QuestNav
-    private final StructPublisher<Pose2d> questPose =
-    inst.getTable("QuestNav").getStructTopic("Pose", Pose2d.struct).publish();
-
-    public void publishQuestPose(Pose2d pose) {
-        questPose.set(pose);
-    }
-
 
     /** Accept the swerve drive state and telemeterize it to SmartDashboard and SignalLogger. */
     public void telemeterize(SwerveDriveState state) {

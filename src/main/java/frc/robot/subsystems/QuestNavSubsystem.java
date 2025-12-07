@@ -1,51 +1,38 @@
-package frc.robot.subsystems.quest;
+package frc.robot.subsystems;
 
 import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
 
-import edu.wpi.first.math.Matrix;
-import edu.wpi.first.math.VecBuilder;
+// WPI libraries
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Transform3d;
-import edu.wpi.first.math.numbers.N1;
-import edu.wpi.first.math.numbers.N3;
-import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.subsystems.CommandSwerveDrivetrain;
+// Robot Utilities
+import frc.robot.utilities.Telemetry;
+import frc.robot.subsystems.quest.PoseFrame;
+import frc.robot.subsystems.quest.QuestNav;
+
+// Constants
+import static frc.robot.Constants.Quest.*;
 
 /**
  * Subsystem wrapper for QuestNav integration.
  * Responsible for reading QuestNav pose frames, transforming them into robot space,
  * and feeding them into the drivetrain's pose estimator.
  */
-
 public class QuestNavSubsystem extends SubsystemBase {
 
     private final QuestNav questNav = new QuestNav();
     private final CommandSwerveDrivetrain drivetrain;
     private Pose2d latestPose = new Pose2d();
 
-    // Mount transform: robot origin -> QuestNav sensor
-    private static final Transform3d ROBOT_TO_QUEST =
-        new Transform3d(0.381, 0.0, 0.3048, new Rotation3d(0.0, 0.0, 0.0));
-
-    // Standard deviations for measurement trust
-    private static final Matrix<N3, N1> QUESTNAV_STD_DEVS = VecBuilder.fill(
-        0.02,  // 2 cm X
-        0.02,  // 2 cm Y
-        0.035  // ~2 degrees
-    );
-
     // Publisher for debugging
-    private final StructPublisher<Pose2d> questPosePublisher =
-        NetworkTableInstance.getDefault().getStructTopic("QuestPose", Pose2d.struct).publish();
+    private final Telemetry logger;
 
-    public QuestNavSubsystem(CommandSwerveDrivetrain drivetrain) {
+    public QuestNavSubsystem(CommandSwerveDrivetrain drivetrain, Telemetry logger) {
         this.drivetrain = drivetrain;
+        this.logger = logger;
     }
 
     @Override
@@ -54,19 +41,26 @@ public class QuestNavSubsystem extends SubsystemBase {
     }
 
     private void update() {
-        if (!questNav.isTracking()) return;
+        if (!questNav.isTracking()) {
+            latestPose = new Pose2d(); // clear when not tracking
+            return;
+        }
     
         PoseFrame[] questFrames = questNav.getAllUnreadPoseFrames();
-        for (PoseFrame questFrame : questFrames) {
-            Pose3d questPose = questFrame.questPose3d();
-            double timestamp = questFrame.dataTimestamp();
+        if (questFrames.length == 0) return;
     
-            Pose3d robotPose = questPose.transformBy(ROBOT_TO_QUEST.inverse());
-            latestPose = robotPose.toPose2d(); // <-- update latestPose
+        // Use the most recent frame
+        PoseFrame questFrame = questFrames[questFrames.length - 1];
+        Pose3d questPose = questFrame.questPose3d();
+        double timestamp = questFrame.dataTimestamp();
     
-            drivetrain.addVisionMeasurement(latestPose, timestamp, QUESTNAV_STD_DEVS);
-            questPosePublisher.set(latestPose);
-        }
+        Pose3d robotPose = questPose.transformBy(ROBOT_TO_QUEST.inverse());
+        latestPose = robotPose.toPose2d();
+    
+        drivetrain.addVisionMeasurement(latestPose, timestamp, QUESTNAV_STD_DEVS);
+
+        // Publish to Telemetry logger as well
+        logger.publishQuestPose(latestPose);
     }
     
     /** Returns the most recent robot pose from QuestNav */
