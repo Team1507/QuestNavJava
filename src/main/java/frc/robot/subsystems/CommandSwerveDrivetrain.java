@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -250,6 +251,18 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         });
         m_simNotifier.startPeriodic(kSimLoopPeriod);
     }
+
+    @Override
+    public void simulationPeriodic() {
+        // Get the current estimated pose from the drivetrain's state
+        Pose2d pose = getState().Pose;
+
+        // Publish pose data to SmartDashboard so it appears in simulation
+        SmartDashboard.putNumber("Sim X", pose.getX()); // meters
+        SmartDashboard.putNumber("Sim Y", pose.getY()); // meters
+        SmartDashboard.putNumber("Sim Heading", pose.getRotation().getDegrees()); // degrees
+    }
+
 
     /**
      * Adds a vision measurement to the Kalman Filter. This will correct the odometry pose estimate

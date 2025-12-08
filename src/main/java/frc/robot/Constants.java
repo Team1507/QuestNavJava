@@ -6,6 +6,7 @@ package frc.robot;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -28,8 +29,8 @@ public final class Constants {
     }
 
     public static final class Drive {
-        public static final double TRANSLATION_SCALE = 0.15;
-        public static final double ROTATION_SCALE = 0.25;
+        public static final double TRANSLATION_SCALE    = 0.15;  // 0.15 // Input from X and Y controller to limit max speed from controller
+        public static final double ROTATION_SCALE       = 0.25;  // 0.25 // Input from X of controller to limit max speed from controller
     }
 
     public static final class Quest {
@@ -53,5 +54,32 @@ public final class Constants {
             0.02,  // 2 cm Y
             0.035  // ~2 degrees
         );
+    }
+
+    public static final class MoveToPose {
+        // PID gains for X, Y, and rotation
+        public static final double X_KP = 1.0;
+        public static final double X_KI = 0.0;
+        public static final double X_KD = 0.0;
+
+        public static final double Y_KP = 1.0;
+        public static final double Y_KI = 0.0;
+        public static final double Y_KD = 0.0;
+
+        public static final double THETA_KP = 2.0;
+        public static final double THETA_KI = 0.0;
+        public static final double THETA_KD = 0.0;
+
+        // Tolerances
+        public static final double POSITION_TOLERANCE_METERS = 0.05;
+        public static final double ANGLE_TOLERANCE_RADIANS = Math.toRadians(2.0);
+
+        // Timeouts
+        public static final double STALL_THRESHOLD = 0.02; // meters
+        public static final double STALL_TIMEOUT = 1.0; // seconds
+        
+        // Poses
+        public static final Pose2d POSE_A = new Pose2d(2.0, 1.0, Rotation2d.fromDegrees(90));
+        public static final Pose2d POSE_B = new Pose2d(4.0, 2.0, Rotation2d.fromDegrees(180));
     }
 }
