@@ -57,28 +57,33 @@ public final class Constants {
     }
 
     public static final class MoveToPose {
-        // PID gains for X, Y, and rotation
-        public static final double X_KP = 1.0;
-        public static final double X_KI = 0.0;
-        public static final double X_KD = 0.0;
+        // --- PID gains for X, Y, and rotation ---
+        public static final double X_KP     = 1.0;
+        public static final double X_KI     = 0.0;
+        public static final double X_KD     = 0.0;
 
-        public static final double Y_KP = 1.0;
-        public static final double Y_KI = 0.0;
-        public static final double Y_KD = 0.0;
+        public static final double Y_KP     = 1.0;
+        public static final double Y_KI     = 0.0;
+        public static final double Y_KD     = 0.0;
 
         public static final double THETA_KP = 2.0;
         public static final double THETA_KI = 0.0;
         public static final double THETA_KD = 0.0;
 
-        // Tolerances
-        public static final double POSITION_TOLERANCE_METERS = 0.05;
-        public static final double ANGLE_TOLERANCE_RADIANS = Math.toRadians(2.0);
+        // --- Speed cap and deadband ---
+        public static final double MAX_LINEAR_SPEED     = 2.0;  // m/s cap for testing
+        public static final double MAX_ANGULAR_SPEED    = 3.0;  // rad/s cap for testing
+        public static final double DEADBAND_ERROR       = 0.02; // meters, near target
 
-        // Timeouts
-        public static final double STALL_THRESHOLD = 0.02; // meters
-        public static final double STALL_TIMEOUT = 1.0; // seconds
+        // --- Tolerances ---
+        public static final double POSITION_TOLERANCE_METERS    = 0.05;
+        public static final double ANGLE_TOLERANCE_RADIANS      = Math.toRadians(2.0);
+
+        // --- Timeouts ---
+        public static final double STALL_THRESHOLD  = 0.02; // meters
+        public static final double STALL_TIMEOUT    = 1.0;  // seconds
         
-        // Poses
+        // --- Poses ---
         public static final Pose2d POSE_A = new Pose2d(2.0, 1.0, Rotation2d.fromDegrees(90));
         public static final Pose2d POSE_B = new Pose2d(4.0, 2.0, Rotation2d.fromDegrees(180));
     }

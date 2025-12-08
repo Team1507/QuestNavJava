@@ -58,7 +58,6 @@ public class CmdMoveToPose extends Command {
     Pose2d currentPose = drivetrain.getState().Pose;
 
     // Calculate velocity commands using PID controllers
-    // Each controller compares current vs target and outputs a speed
     double xSpeed = xController.calculate(currentPose.getX(), targetPose.getX());
     double ySpeed = yController.calculate(currentPose.getY(), targetPose.getY());
     double thetaSpeed = thetaController.calculate(
@@ -66,21 +65,30 @@ public class CmdMoveToPose extends Command {
         targetPose.getRotation().getRadians()
     );
 
+    // Cap speeds
+    xSpeed = Math.copySign(Math.min(Math.abs(xSpeed), MAX_LINEAR_SPEED), xSpeed);
+    ySpeed = Math.copySign(Math.min(Math.abs(ySpeed), MAX_LINEAR_SPEED), ySpeed);
+    thetaSpeed = Math.copySign(Math.min(Math.abs(thetaSpeed), MAX_ANGULAR_SPEED), thetaSpeed);
+
+    // Deadband small dithers near target
+    if (Math.abs(targetPose.getX() - currentPose.getX()) < DEADBAND_ERROR) xSpeed = 0.0;
+    if (Math.abs(targetPose.getY() - currentPose.getY()) < DEADBAND_ERROR) ySpeed = 0.0;
+
     // Convert field-relative X/Y to robot-relative using current heading
     ChassisSpeeds robotRelativeSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
-      xSpeed,
-      ySpeed,
-      thetaSpeed,
-      currentPose.getRotation()
+        xSpeed,
+        ySpeed,
+        thetaSpeed,
+        currentPose.getRotation()
     );
 
     // Send robot-relative speeds to CTRE
     SwerveRequest.ApplyRobotSpeeds request = new SwerveRequest.ApplyRobotSpeeds()
-      .withSpeeds(robotRelativeSpeeds);
+        .withSpeeds(robotRelativeSpeeds);
 
     drivetrain.setControl(request);
-
   }
+
 
   @Override
   public void end(boolean interrupted) {
