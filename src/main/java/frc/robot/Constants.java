@@ -98,6 +98,16 @@ public final class Constants {
     }
 
     public static final class FieldElements {
+        // --- Field ---
+        public static final double FIELD_LENGTH = 16.54; // meters
+        public static final double FIELD_WIDTH  = 8.21;  // meters
+        public static final List<Translation2d> FIELD_BOUNDARY = List.of(
+            new Translation2d(0, 0),
+            new Translation2d(FIELD_LENGTH, 0),
+            new Translation2d(FIELD_LENGTH, FIELD_WIDTH),
+            new Translation2d(0, FIELD_WIDTH)
+        );
+        
         // --- Reef ---
         public static final Translation2d REEF_CENTER = new Translation2d(4.5, 4.0);
         public static final double CLEARANCE_Y = 1.5; // vertical margin

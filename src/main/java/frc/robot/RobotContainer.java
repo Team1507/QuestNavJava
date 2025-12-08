@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 // Robot Commands
 import frc.robot.commands.CmdMoveToPose;
 import frc.robot.commands.CmdMoveTrajectory;
+import frc.robot.commands.CmdMoveRRT;
 // Robot Subsystems
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.QuestNavSubsystem;
@@ -85,7 +86,7 @@ public class RobotContainer {
         joystick.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
         // Start moving to POSE_A when X is pressed
-        joystick.x().onTrue(new CmdMoveTrajectory(drivetrain, POSE_A));
+        joystick.x().onTrue(new CmdMoveRRT(drivetrain, POSE_A));
         // Start moving to POSE_B when Y is pressed
         joystick.y().onTrue(new CmdMoveToPose(drivetrain, POSE_B));
 
