@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import java.util.List;
+
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -11,6 +13,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
@@ -24,13 +27,19 @@ import edu.wpi.first.math.util.Units;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
+
+    public static final class RobotGeometry {
+        public static final double HALF_LENGTH_METERS = 0.35; // half of robot length
+        public static final double HALF_WIDTH_METERS  = 0.35; // half of robot width
+    }
+    
     public static final class IO {
         public static final int JOYSTICK_PORT = 0;
     }
 
     public static final class Drive {
-        public static final double TRANSLATION_SCALE    = 0.15;  // 0.15 // Input from X and Y controller to limit max speed from controller
-        public static final double ROTATION_SCALE       = 0.25;  // 0.25 // Input from X of controller to limit max speed from controller
+        public static final double TRANSLATION_SCALE    = 0.9;  // 0.15 // Input from X and Y controller to limit max speed from controller
+        public static final double ROTATION_SCALE       = 0.9;  // 0.25 // Input from X of controller to limit max speed from controller
     }
 
     public static final class Quest {
@@ -86,5 +95,20 @@ public final class Constants {
         // --- Poses ---
         public static final Pose2d POSE_A = new Pose2d(2.0, 1.0, Rotation2d.fromDegrees(90));
         public static final Pose2d POSE_B = new Pose2d(4.0, 2.0, Rotation2d.fromDegrees(180));
+    }
+
+    public static final class FieldElements {
+        // --- Reef ---
+        public static final Translation2d REEF_CENTER = new Translation2d(4.5, 4.0);
+        public static final double CLEARANCE_Y = 1.5; // vertical margin
+        public static final double CLEARANCE_X = 1.5; // lateral margin
+        public static final List<Translation2d> REEF_HEX = List.of(
+            new Translation2d(4.5, 5.0),
+            new Translation2d(3.65, 4.4),
+            new Translation2d(3.65, 3.5),
+            new Translation2d(4.5, 3.0),
+            new Translation2d(5.35, 3.5),
+            new Translation2d(5.35, 4.4)
+        );
     }
 }

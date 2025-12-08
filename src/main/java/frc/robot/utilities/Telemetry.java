@@ -4,6 +4,8 @@ import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.swerve.SwerveDrivetrain.SwerveDriveState;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -14,11 +16,14 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StringPublisher;
 import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.networktables.StructPublisher;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
+
+import static frc.robot.Constants.FieldElements.*;
 
 public class Telemetry {
     private final double MaxSpeed;
@@ -130,4 +135,18 @@ public class Telemetry {
             SmartDashboard.putData("Module " + i, m_moduleMechanisms[i]);
         }
     }
+
+    // Field overlay for AdvantageScope
+    private final Field2d fieldOverlay = new Field2d();
+
+    /** Publish a polygon (like the reef hex) to AdvantageScope */
+    public void publishPolygon(String name, java.util.List<Translation2d> polygon) {
+        for (int i = 0; i < polygon.size(); i++) {
+            Translation2d pt = polygon.get(i);
+            fieldOverlay.getObject(name + "_pt" + i).setPose(new Pose2d(pt, new Rotation2d()));
+        }
+        SmartDashboard.putData("FieldOverlay", fieldOverlay);
+    }
+
+
 }

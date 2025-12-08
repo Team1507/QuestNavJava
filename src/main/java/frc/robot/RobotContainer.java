@@ -9,16 +9,14 @@ import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 // WPI libraries
 import static edu.wpi.first.units.Units.*;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
-import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 // Robot Commands
 import frc.robot.commands.CmdMoveToPose;
+import frc.robot.commands.CmdMoveTrajectory;
 // Robot Subsystems
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.QuestNavSubsystem;
@@ -54,6 +52,7 @@ public class RobotContainer {
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
     public final QuestNavSubsystem questNavSubsystem = new QuestNavSubsystem(drivetrain, logger);
 
+    
     public RobotContainer() {
         configureBindings();
     }
@@ -86,9 +85,9 @@ public class RobotContainer {
         joystick.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
         // Start moving to POSE_A when X is pressed
-        joystick.x().onTrue(new CmdMoveToPose(drivetrain, Constants.MoveToPose.POSE_A));
+        joystick.x().onTrue(new CmdMoveTrajectory(drivetrain, POSE_A));
         // Start moving to POSE_B when Y is pressed
-        joystick.y().onTrue(new CmdMoveToPose(drivetrain, Constants.MoveToPose.POSE_B));
+        joystick.y().onTrue(new CmdMoveToPose(drivetrain, POSE_B));
 
         // Cancel the move when B is pressed
         joystick.b().onTrue(drivetrain.runOnce(() -> {

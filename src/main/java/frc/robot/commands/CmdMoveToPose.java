@@ -6,22 +6,25 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
-// Robot Subsystems
+
+// Robot Subsystems & Utilities
 import frc.robot.subsystems.CommandSwerveDrivetrain;
+
 // Robot Constants
 import static frc.robot.Constants.MoveToPose.*;
 
 /**
  * Command that drives the robot to a target Pose2d (x, y, heading).
  * - Uses PID controllers for X, Y, and rotation.
- * - Sends velocity requests to the CTRE swerve drivetrain via ApplyRobotSpeeds.
+ * - Converts field-relative velocity requests into robot-relative speeds.
+ * - Sends those speeds to the CTRE swerve drivetrain via ApplyRobotSpeeds.
  * - Includes stall detection logic to exit if the robot gets stuck.
  */
 public class CmdMoveToPose extends Command {
   private final CommandSwerveDrivetrain drivetrain;
   private final Pose2d targetPose;
 
-  // Variables used for stall detection
+  // Variables used for stall detection (track last position + time)
   private double lastX, lastY, lastCheckTime;
 
   // PID controllers for each axis of motion
@@ -46,7 +49,7 @@ public class CmdMoveToPose extends Command {
     lastY = drivetrain.getState().Pose.getY();
     lastCheckTime = edu.wpi.first.wpilibj.Timer.getFPGATimestamp();
 
-    // Reset PID controllers at start of command
+    // Reset PID controllers at start of command (clear accumulated error)
     xController.reset();
     yController.reset();
     thetaController.reset();
@@ -54,27 +57,38 @@ public class CmdMoveToPose extends Command {
 
   @Override
   public void execute() {
-    // Get current robot pose from drivetrain's state estimator
+    // 1. Get current robot pose from drivetrain's state estimator
     Pose2d currentPose = drivetrain.getState().Pose;
 
-    // Calculate velocity commands using PID controllers
-    double xSpeed = xController.calculate(currentPose.getX(), targetPose.getX());
-    double ySpeed = yController.calculate(currentPose.getY(), targetPose.getY());
+    // 2. Calculate velocity commands using PID controllers
+    // Each controller compares current vs target and outputs a speed
+    double xSpeed = xController.calculate(
+      currentPose.getX(), 
+      targetPose.getX()
+    );
+    double ySpeed = yController.calculate(
+      currentPose.getY(), 
+      targetPose.getY()
+    );
     double thetaSpeed = thetaController.calculate(
         currentPose.getRotation().getRadians(),
         targetPose.getRotation().getRadians()
     );
 
-    // Cap speeds
+    // 3. Cap speeds to prevent runaway values
+    // (keeps motion safe and predictable during tuning)
     xSpeed = Math.copySign(Math.min(Math.abs(xSpeed), MAX_LINEAR_SPEED), xSpeed);
     ySpeed = Math.copySign(Math.min(Math.abs(ySpeed), MAX_LINEAR_SPEED), ySpeed);
     thetaSpeed = Math.copySign(Math.min(Math.abs(thetaSpeed), MAX_ANGULAR_SPEED), thetaSpeed);
 
-    // Deadband small dithers near target
+    // 4. Deadband small dithers near target
+    // If error is below DEADBAND_ERROR, zero out tiny corrections
+    // This prevents jittery "hunting" around the goal
     if (Math.abs(targetPose.getX() - currentPose.getX()) < DEADBAND_ERROR) xSpeed = 0.0;
     if (Math.abs(targetPose.getY() - currentPose.getY()) < DEADBAND_ERROR) ySpeed = 0.0;
 
-    // Convert field-relative X/Y to robot-relative using current heading
+    // 5. Convert field-relative X/Y to robot-relative using current heading
+    // (PID math is in field coordinates, but drivetrain expects robot-relative)
     ChassisSpeeds robotRelativeSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
         xSpeed,
         ySpeed,
@@ -82,13 +96,12 @@ public class CmdMoveToPose extends Command {
         currentPose.getRotation()
     );
 
-    // Send robot-relative speeds to CTRE
+    // 6. Send robot-relative speeds to CTRE drivetrain
     SwerveRequest.ApplyRobotSpeeds request = new SwerveRequest.ApplyRobotSpeeds()
         .withSpeeds(robotRelativeSpeeds);
 
     drivetrain.setControl(request);
   }
-
 
   @Override
   public void end(boolean interrupted) {
