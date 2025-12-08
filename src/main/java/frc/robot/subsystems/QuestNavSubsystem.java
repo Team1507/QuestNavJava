@@ -58,7 +58,7 @@ public class QuestNavSubsystem extends SubsystemBase {
         Pose3d robotPose = questPose.transformBy(ROBOT_TO_QUEST.inverse());
         latestPose = robotPose.toPose2d();
     
-        drivetrain.addVisionMeasurement(latestPose, timestamp, QUESTNAV_STD_DEVS);
+        //drivetrain.addVisionMeasurement(latestPose, timestamp, QUESTNAV_STD_DEVS);
 
         // Publish to Telemetry logger as well
         logger.publishQuestPose(latestPose);
