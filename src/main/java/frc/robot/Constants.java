@@ -80,8 +80,8 @@ public final class Constants {
         public static final double THETA_KD = 0.0;
 
         // --- Speed cap and deadband ---
-        public static final double MAX_LINEAR_SPEED     = 2.0;  // m/s cap for testing
-        public static final double MAX_ANGULAR_SPEED    = 3.0;  // rad/s cap for testing
+        public static final double MAX_LINEAR_SPEED     = 8.0;  // 2 m/s cap for testing
+        public static final double MAX_ANGULAR_SPEED    = 8.0;  // 3 rad/s cap for testing
         public static final double DEADBAND_ERROR       = 0.02; // meters, near target
 
         // --- Tolerances ---
@@ -107,7 +107,7 @@ public final class Constants {
             new Translation2d(FIELD_LENGTH, FIELD_WIDTH),
             new Translation2d(0, FIELD_WIDTH)
         );
-        
+
         // --- Reef ---
         public static final Translation2d REEF_CENTER = new Translation2d(4.5, 4.0);
         public static final double CLEARANCE_Y = 1.5; // vertical margin

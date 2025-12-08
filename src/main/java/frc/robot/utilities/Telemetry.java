@@ -56,13 +56,13 @@ public class Telemetry {
     private final DoubleArrayPublisher fieldPub = table.getDoubleArrayTopic("robotPose").publish();
     private final StringPublisher fieldTypePub = table.getStringTopic(".type").publish();
 
-    /* QuestNav */
-    private final StructPublisher<Pose2d> questPose =
-        inst.getTable("QuestNav").getStructTopic("Pose", Pose2d.struct).publish();
+    /* QuestNav pose published under DriveState table */
+    private final StructPublisher<Pose2d> driveQuestPose =
+        driveStateTable.getStructTopic("QuestNavPose", Pose2d.struct).publish();
 
-    /** Publish QuestNav pose for debugging */
+    /** Publish QuestNav pose under DriveState for debugging */
     public void publishQuestPose(Pose2d pose) {
-        questPose.set(pose);
+        driveQuestPose.set(pose);
     }
 
     /* Mechanisms to represent the swerve module states */

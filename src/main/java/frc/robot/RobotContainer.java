@@ -73,7 +73,7 @@ public class RobotContainer {
             )
         );
 
-        joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
+        //joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
 
         // Run SysId routines when holding back/start and X/Y.
         // Note that each routine should be run exactly once in a single log.
@@ -85,10 +85,17 @@ public class RobotContainer {
         // reset the field-centric heading on left bumper press
         joystick.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
-        // Start moving to POSE_A when X is pressed
-        joystick.x().onTrue(new CmdMoveRRT(drivetrain, POSE_A));
-        // Start moving to POSE_B when Y is pressed
-        joystick.y().onTrue(new CmdMoveToPose(drivetrain, POSE_B));
+        // Start moving to POSE_A when X is pressed 
+        // checking for collisions and 2 waypoints to avoid obstacles
+        joystick.x().onTrue(new CmdMoveTrajectory(drivetrain, POSE_A));
+
+        // Start moving to POSE_A when A is pressed 
+        // using RRT & RRT* to plan an optimized path around obstacles
+        joystick.a().onTrue(new CmdMoveRRT(drivetrain, POSE_A));
+
+        // Start moving to POSE_A when Y is pressed 
+        // using point to point motion in a stright line
+        joystick.y().onTrue(new CmdMoveToPose(drivetrain, POSE_A));
 
         // Cancel the move when B is pressed
         joystick.b().onTrue(drivetrain.runOnce(() -> {

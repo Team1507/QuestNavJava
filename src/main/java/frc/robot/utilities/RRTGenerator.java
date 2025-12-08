@@ -39,7 +39,7 @@ public class RRTGenerator {
         // Inflate reef polygon by half the robot diagonal.
         // This ensures clearance: if the robot center avoids the inflated reef,
         // the actual robot footprint avoids the real reef.
-        double inflate = Math.hypot(HALF_LENGTH_METERS, HALF_WIDTH_METERS);
+        double inflate = Math.hypot(HALF_LENGTH_METERS, HALF_WIDTH_METERS) + 0.2;
         List<Translation2d> inflatedReef = inflatePolygon(REEF_HEX, inflate);
 
         // Initialize RRT tree with root node at the start position.
@@ -288,7 +288,8 @@ public class RRTGenerator {
      * @return True if any sampled point along the edge collides with reef, false otherwise.
      */
     private static boolean edgeCollides(Translation2d a, Translation2d b, List<Translation2d> reefPoly) {
-        int steps = 10; // number of samples along the edge
+        double edgeLength = a.getDistance(b);
+        int steps = Math.max(10, (int)(edgeLength / 0.1)); // sample every 10cm
         for (int i = 0; i <= steps; i++) {
             double t = i / (double) steps;
             double x = a.getX() + t * (b.getX() - a.getX());
