@@ -6,6 +6,8 @@ package frc.robot;
 
 import java.util.List;
 
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -14,6 +16,7 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
@@ -34,7 +37,16 @@ public final class Constants {
     }
     
     public static final class IO {
+        // Controllers
         public static final int JOYSTICK_PORT = 0;
+
+        // Photon Vision
+        public static final Transform3d CAMERA_TO_ROBOT =
+            new Transform3d(
+                new Translation3d(0.25, 0.20, 0.30), // meters: forward, left, up
+                new Rotation3d(0, 0, 0)     // radians: pitch, yaw, roll
+            );
+
     }
 
     public static final class Drive {
@@ -98,6 +110,10 @@ public final class Constants {
     }
 
     public static final class FieldElements {
+        // --- April Tags ---
+        public static final AprilTagFieldLayout APRILTAG_LAYOUT =
+            AprilTagFields.k2025Reefscape.loadAprilTagLayoutField();
+
         // --- Field ---
         public static final double FIELD_LENGTH = 16.54; // meters
         public static final double FIELD_WIDTH  = 8.21;  // meters
