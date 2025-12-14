@@ -28,15 +28,8 @@ import static frc.robot.Constants.FieldElements.*;
 public class Telemetry {
     private final double MaxSpeed;
 
-    /**
-     * Construct a telemetry object, with the specified max speed of the robot
-     * 
-     * @param maxSpeed Maximum speed in meters per second
-     */
-    public Telemetry(double maxSpeed) {
-        MaxSpeed = maxSpeed;
-        SignalLogger.start();
-    }
+    // Map of vision subsystem names → their pose publishers
+    private final java.util.Map<String, StructPublisher<Pose2d>> visionPosePublishers = new java.util.HashMap<>();
 
     /* What to publish over networktables for telemetry */
     private final NetworkTableInstance inst = NetworkTableInstance.getDefault();
@@ -56,15 +49,50 @@ public class Telemetry {
     private final DoubleArrayPublisher fieldPub = table.getDoubleArrayTopic("robotPose").publish();
     private final StringPublisher fieldTypePub = table.getStringTopic(".type").publish();
 
-    /* QuestNav pose published under DriveState table */
-    private final StructPublisher<Pose2d> driveQuestPose =
-        driveStateTable.getStructTopic("QuestNavPose", Pose2d.struct).publish();
-
-    /** Publish QuestNav pose under DriveState for debugging */
-    public void publishQuestPose(Pose2d pose) {
-        driveQuestPose.set(pose);
+    /**
+     * Construct a telemetry object, with the specified max speed of the robot
+     * 
+     * @param maxSpeed Maximum speed in meters per second
+     */
+    public Telemetry(double maxSpeed) {
+        MaxSpeed = maxSpeed;
+        SignalLogger.start();
+    
+        // Register vision publishers
+        visionPosePublishers.put(
+            "QuestNavSubsystem",
+            driveStateTable.getStructTopic("QuestNavPose", Pose2d.struct).publish()
+        );
+    
+        visionPosePublishers.put(
+            "PhotonVisionSubsystem",
+            driveStateTable.getStructTopic("PhotonVisionPose", Pose2d.struct).publish()
+        );
     }
 
+    /**
+     * Publishes a vision-derived robot pose to the DriveState NetworkTable.
+     *
+     * This method is used by all VisionSystem subclasses (QuestNav, PhotonVision, etc.)
+     * to publish their latest estimated Pose2d under a subsystem‑specific topic.
+     *
+     * The sourceName parameter should match the subsystem's class name
+     * (e.g., "QuestNavSubsystem", "PhotonVisionSubsystem"), which is used to
+     * look up the correct StructPublisher from the visionPosePublishers map.
+     *
+     * If a matching publisher exists, the pose is written to NetworkTables
+     * for visualization and debugging in AdvantageScope.
+     *
+     * @param sourceName  the name of the vision subsystem publishing the pose
+     * @param pose        the latest estimated robot pose from that subsystem
+     */
+    public void publishVisionPose(String sourceName, Pose2d pose) {
+        StructPublisher<Pose2d> publisher = visionPosePublishers.get(sourceName);
+        if (publisher != null) {
+            publisher.set(pose);
+        }
+    }
+    
     /* Mechanisms to represent the swerve module states */
     private final Mechanism2d[] m_moduleMechanisms = new Mechanism2d[] {
         new Mechanism2d(1, 1),

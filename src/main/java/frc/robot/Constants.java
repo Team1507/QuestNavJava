@@ -50,8 +50,8 @@ public final class Constants {
     }
 
     public static final class Drive {
-        public static final double TRANSLATION_SCALE    = 0.15;  // 0.15 // Input from X and Y controller to limit max speed from controller
-        public static final double ROTATION_SCALE       = 0.25;  // 0.25 // Input from X of controller to limit max speed from controller
+        public static final double TRANSLATION_SCALE    = 0.9;  // 0.15 // Input from X and Y controller to limit max speed from controller
+        public static final double ROTATION_SCALE       = 0.9;  // 0.25 // Input from X of controller to limit max speed from controller
     }
 
     public static final class Quest {
@@ -92,9 +92,9 @@ public final class Constants {
         public static final double THETA_KD = 0.0;
 
         // --- Speed cap and deadband ---
-        public static final double MAX_LINEAR_SPEED     = 0.75;  // 2 m/s cap for testing
-        public static final double MAX_ANGULAR_SPEED    = 0.75;  // 3 rad/s cap for testing
-        public static final double DEADBAND_ERROR       = 0.02; // meters, near target
+        public static final double MAX_LINEAR_SPEED     = 8;  // 2 m/s cap for testing
+        public static final double MAX_ANGULAR_SPEED    = 8;  // 3 rad/s cap for testing
+        public static final double DEADBAND_ERROR       = 8; // meters, near target
 
         // --- Tolerances ---
         public static final double POSITION_TOLERANCE_METERS    = 0.05;
@@ -105,8 +105,8 @@ public final class Constants {
         public static final double STALL_TIMEOUT    = 1.0;  // seconds
         
         // --- Poses ---
-        public static final Pose2d POSE_A = new Pose2d(3.0, 0.0, Rotation2d.fromDegrees(0));
-        public static final Pose2d POSE_B = new Pose2d(0.0, 0.0, Rotation2d.fromDegrees(0));
+        public static final Pose2d POSE_A = new Pose2d(2.0, 1.0, Rotation2d.fromDegrees(90));
+        public static final Pose2d POSE_B = new Pose2d(3.0, 4.0, Rotation2d.fromDegrees(0));
     }
 
     public static final class FieldElements {

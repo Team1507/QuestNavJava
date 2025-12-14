@@ -21,6 +21,7 @@ import frc.robot.commands.CmdMoveRRT;
 // Robot Subsystems
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.QuestNavSubsystem;
+import frc.robot.subsystems.PhotonVisionSubsystem;
 // Robot Constants
 import static frc.robot.Constants.IO.*;
 import static frc.robot.Constants.Drive.*;
@@ -52,6 +53,8 @@ public class RobotContainer {
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
     public final QuestNavSubsystem questNavSubsystem = new QuestNavSubsystem(drivetrain, logger);
+
+    public final PhotonVisionSubsystem photonVisionSubsystem = new PhotonVisionSubsystem(drivetrain, logger, null);
 
     
     public RobotContainer() {
@@ -91,18 +94,21 @@ public class RobotContainer {
 
         // Start moving to POSE_A when A is pressed 
         // using RRT & RRT* to plan an optimized path around obstacles
-        //joystick.a().onTrue(new CmdMoveRRT(drivetrain, POSE_A));
+        joystick.x().onTrue(new CmdMoveRRT(drivetrain, POSE_A));
 
         // Start moving to POSE_A when Y is pressed 
         // using point to point motion in a stright line
-        joystick.y().onTrue(new CmdMoveToPose(drivetrain, POSE_A));
-        joystick.x().onTrue(new CmdMoveToPose(drivetrain, POSE_B));
+        //joystick.y().onTrue(new CmdMoveToPose(drivetrain, POSE_A));
+        //joystick.x().onTrue(new CmdMoveToPose(drivetrain, POSE_B));
 
 
         // Cancel the move when B is pressed
         joystick.b().onTrue(drivetrain.runOnce(() -> {
             CommandScheduler.getInstance().cancelAll();
         }));
+
+        // Set the robot pose to what PhotonVision reads
+        joystick.y().onTrue(Commands.runOnce(photonVisionSubsystem::setDrivetrainPose));
 
         drivetrain.registerTelemetry(logger::telemeterize);
     }

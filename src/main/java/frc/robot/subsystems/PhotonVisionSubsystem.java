@@ -1,8 +1,6 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package frc.robot.subsystems;
+
+import java.util.Optional;
 
 // PhotonVision Libraries
 import org.photonvision.PhotonCamera;
@@ -13,35 +11,44 @@ import org.photonvision.targeting.PhotonPipelineResult;
 
 // WPI libraries
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-import java.util.Optional;
+// Vision base class
+import frc.robot.subsystems.vision.VisionSystem;
 
-// Robot Constants (your own constants class defines APRILTAG_LAYOUT and CAMERA_TO_ROBOT)
+// Robot Utilities
+import frc.robot.utilities.Telemetry;
+
+// Robot Constants
 import static frc.robot.Constants.IO.*;
 import static frc.robot.Constants.FieldElements.*;
 
-public class PhotonVisionSubsystem extends SubsystemBase {
-    // Camera object that talks to PhotonVision running on the coprocessor (OrangePi)
-    private final PhotonCamera camera;
-    private final CommandSwerveDrivetrain drivetrain;
+/**
+ * VisionSystem implementation for PhotonVision.
+ *
+ * Responsible for:
+ *  - Reading AprilTag detections from PhotonVision
+ *  - Running the PhotonPoseEstimator
+ *  - Updating latestPose for the VisionSystem base class
+ *  - Enforcing multi-tag reliability filtering
+ */
+public class PhotonVisionSubsystem extends VisionSystem {
 
-    // Pose estimator that uses AprilTag detections to compute robot field position
+    private final PhotonCamera camera;
     private final PhotonPoseEstimator poseEstimator;
 
     /**
      * Constructor for the PhotonVisionSubsystem.
-     * @param cameraName The name of the camera as configured in the PhotonVision UI.
+     *
+     * @param drivetrain The drivetrain whose pose may be reset by this system.
+     * @param logger     Telemetry logger for publishing vision poses.
+     * @param cameraName The name of the camera as configured in PhotonVision UI.
      */
-    public PhotonVisionSubsystem(CommandSwerveDrivetrain drivetrain, String cameraName) {
-        // Create a PhotonCamera instance bound to the given camera name
-        this.drivetrain = drivetrain;
+    public PhotonVisionSubsystem(CommandSwerveDrivetrain drivetrain, Telemetry logger, String cameraName) {
+        super(drivetrain, logger);
+
         this.camera = new PhotonCamera(cameraName);
 
-        // Create the pose estimator using the official AprilTag field layout,
-        // a chosen strategy, and the known transform from robot center to camera.
-        // MULTI_TAG_PNP_ON_COPROCESSOR = use all visible tags to compute pose on the coprocessor.
-        // LOWEST_AMBIGUITY = pick the mathematically least ambiguous solution.
+        // MULTI_TAG_PNP_ON_COPROCESSOR = best for accuracy and stability
         this.poseEstimator = new PhotonPoseEstimator(
             APRILTAG_LAYOUT,
             PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
@@ -50,43 +57,36 @@ public class PhotonVisionSubsystem extends SubsystemBase {
     }
 
     /**
-     * Query PhotonVision for the robot's estimated field pose.
-     * @return An Optional containing the estimated Pose2d if tags are visible,
-     *         or Optional.empty() if no valid estimate is available.
+     * Updates the latest pose from PhotonVision.
+     * Called automatically by VisionSystem.periodic().
      */
-    public Optional<Pose2d> getEstimatedPose() {
-        // Ask the camera for its latest processed frame results
+    @Override
+    protected void update() {
         PhotonPipelineResult result = camera.getLatestResult();
-    
-        // Feed those results into the pose estimator to compute a robot pose
-        Optional<EstimatedRobotPose> estimated = poseEstimator.update(result);
-    
-        // If PhotonVision produced a valid estimate, convert it to a WPILib Pose2d
-        if (estimated.isPresent()) {
-            return Optional.of(estimated.get().estimatedPose.toPose2d());
+
+        // Require at least 2 tags for reliability
+        if (!result.hasTargets() || result.getTargets().size() < 2) {
+            latestPose = new Pose2d();
+            return;
         }
 
-        // Otherwise, return empty to signal "no tags visible / no estimate available"
-        return Optional.empty();
+        Optional<EstimatedRobotPose> estimated = poseEstimator.update(result);
+        if (estimated.isEmpty()) {
+            latestPose = new Pose2d();
+            return;
+        }
+
+        latestPose = estimated.get().estimatedPose.toPose2d();
+
+        // If you want to fuse into drivetrain estimator:
+        // drivetrain.addVisionMeasurement(latestPose, estimated.get().timestampSeconds, PHOTONVISION_STD_DEVS);
     }
 
     /**
-     * Reset the drivetrain pose to the latest PhotonVision estimate,
-     * but only if multiple AprilTags are visible (for reliability).
+     * Returns whether PhotonVision currently has valid tracking data.
      */
-    public void setDrivetrainPose() {
-        // Get the latest pipeline result from the camera
-        PhotonPipelineResult result = camera.getLatestResult();
-
-        // Only proceed if PhotonVision sees at least 2 tags
-        if (result.hasTargets() && result.getTargets().size() >= 2) {
-            Optional<EstimatedRobotPose> estimated = poseEstimator.update(result);
-
-            if (estimated.isPresent()) {
-                // Reset drivetrain odometry to PhotonVision's absolute field pose
-                drivetrain.resetPose(estimated.get().estimatedPose.toPose2d());
-            }
-        }
-        // If fewer than 2 tags are visible, do nothing (avoid unreliable reset)
+    @Override
+    protected boolean hasValidData() {
+        return !latestPose.equals(new Pose2d());
     }
 }
