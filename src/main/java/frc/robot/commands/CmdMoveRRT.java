@@ -19,6 +19,7 @@ import frc.robot.utilities.RRTGenerator;
 
 // Robot Constants
 import static frc.robot.Constants.MoveToPose.*;
+import static frc.robot.Constants.Speed.*;
 
 /**
  * Command that drives the robot along a generated trajectory
@@ -92,9 +93,9 @@ public class CmdMoveRRT extends Command {
     );
 
     // Cap speeds
-    xSpeed = Math.copySign(Math.min(Math.abs(xSpeed), MAX_LINEAR_SPEED), xSpeed);
-    ySpeed = Math.copySign(Math.min(Math.abs(ySpeed), MAX_LINEAR_SPEED), ySpeed);
-    thetaSpeed = Math.copySign(Math.min(Math.abs(thetaSpeed), MAX_ANGULAR_SPEED), thetaSpeed);
+    xSpeed = Math.copySign(Math.min(Math.abs(xSpeed), getMaxSpeed()), xSpeed);
+    ySpeed = Math.copySign(Math.min(Math.abs(ySpeed), getMaxSpeed()), ySpeed);
+    thetaSpeed = Math.copySign(Math.min(Math.abs(thetaSpeed), getMaxAngularSpeed()), thetaSpeed);
 
     // Deadband near goal
     if (Math.abs(desiredPose.getX() - currentPose.getX()) < DEADBAND_ERROR) xSpeed = 0.0;

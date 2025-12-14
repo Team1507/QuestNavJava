@@ -12,6 +12,7 @@ import frc.robot.subsystems.CommandSwerveDrivetrain;
 
 // Robot Constants
 import static frc.robot.Constants.MoveToPose.*;
+import static frc.robot.Constants.Speed.*;
 
 /**
  * Command that drives the robot to a target Pose2d (x, y, heading).
@@ -77,9 +78,9 @@ public class CmdMoveToPose extends Command {
 
     // 3. Cap speeds to prevent runaway values
     // (keeps motion safe and predictable during tuning)
-    xSpeed = Math.copySign(Math.min(Math.abs(xSpeed), MAX_LINEAR_SPEED), xSpeed);
-    ySpeed = Math.copySign(Math.min(Math.abs(ySpeed), MAX_LINEAR_SPEED), ySpeed);
-    thetaSpeed = Math.copySign(Math.min(Math.abs(thetaSpeed), MAX_ANGULAR_SPEED), thetaSpeed);
+    xSpeed = Math.copySign(Math.min(Math.abs(xSpeed), getMaxSpeed()), xSpeed);
+    ySpeed = Math.copySign(Math.min(Math.abs(ySpeed), getMaxSpeed()), ySpeed);
+    thetaSpeed = Math.copySign(Math.min(Math.abs(thetaSpeed), getMaxAngularSpeed()), thetaSpeed);
 
     // 4. Deadband small dithers near target
     // If error is below DEADBAND_ERROR, zero out tiny corrections

@@ -7,8 +7,7 @@ package frc.robot;
 // CTRE libraries
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
-// WPI libraries
-import static edu.wpi.first.units.Units.*;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -24,8 +23,8 @@ import frc.robot.subsystems.QuestNavSubsystem;
 import frc.robot.subsystems.PhotonVisionSubsystem;
 // Robot Constants
 import static frc.robot.Constants.IO.*;
-import static frc.robot.Constants.Drive.*;
 import static frc.robot.Constants.MoveToPose.*;
+import static frc.robot.Constants.Speed.*;
 // Robot Extra
 import frc.robot.generated.TunerConstants;
 import frc.robot.utilities.Telemetry;
@@ -37,17 +36,15 @@ import frc.robot.utilities.Telemetry;
  * subsystems, commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
-    private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
-    private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
 
     /* Setting up bindings for necessary control of the swerve drive platform */
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
-            .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
-            .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
+        .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
+
     private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
     private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
 
-    private final Telemetry logger = new Telemetry(MaxSpeed);
+    private final Telemetry logger = new Telemetry(getMaxSpeed());
 
     private final CommandXboxController joystick = new CommandXboxController(JOYSTICK_PORT);
 
@@ -68,13 +65,16 @@ public class RobotContainer {
         // Note that X is defined as forward according to WPILib convention,
         // and Y is defined as to the left according to WPILib convention.
         drivetrain.setDefaultCommand(
-            // Drivetrain will execute this command periodically
-            drivetrain.applyRequest(() ->
-                drive.withVelocityX((-joystick.getLeftY() * TRANSLATION_SCALE) * MaxSpeed) // Drive forward with negative Y (forward)
-                    .withVelocityY((-joystick.getLeftX() * TRANSLATION_SCALE) * MaxSpeed) // Drive left with negative X (left)
-                    .withRotationalRate((-joystick.getRightX() * ROTATION_SCALE) * MaxAngularRate) // Drive counterclockwise with negative X (left)
+            drivetrain.applyRequest(() -> 
+                drive
+                    .withDeadband(getMaxSpeed() * 0.1)
+                    .withRotationalDeadband(getMaxAngularSpeed() * 0.1)
+                    .withVelocityX(-joystick.getLeftY() * getTranslationScale() * getMaxSpeed())
+                    .withVelocityY(-joystick.getLeftX() * getTranslationScale() * getMaxSpeed())
+                    .withRotationalRate(-joystick.getRightX() * getRotationScale() * getMaxAngularSpeed())
             )
         );
+
 
         //joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
 
@@ -90,15 +90,15 @@ public class RobotContainer {
 
         // Start moving to POSE_A when X is pressed 
         // checking for collisions and 2 waypoints to avoid obstacles
-        //joystick.x().onTrue(new CmdMoveTrajectory(drivetrain, POSE_A));
+        joystick.x().onTrue(new CmdMoveTrajectory(drivetrain, POSE_A));
 
         // Start moving to POSE_A when A is pressed 
         // using RRT & RRT* to plan an optimized path around obstacles
-        joystick.x().onTrue(new CmdMoveRRT(drivetrain, POSE_A));
+        joystick.a().onTrue(new CmdMoveRRT(drivetrain, POSE_A));
 
         // Start moving to POSE_A when Y is pressed 
         // using point to point motion in a stright line
-        //joystick.y().onTrue(new CmdMoveToPose(drivetrain, POSE_A));
+        joystick.y().onTrue(new CmdMoveToPose(drivetrain, POSE_A));
         //joystick.x().onTrue(new CmdMoveToPose(drivetrain, POSE_B));
 
 
@@ -108,7 +108,7 @@ public class RobotContainer {
         }));
 
         // Set the robot pose to what PhotonVision reads
-        joystick.y().onTrue(Commands.runOnce(photonVisionSubsystem::setDrivetrainPose));
+        // joystick.y().onTrue(Commands.runOnce(photonVisionSubsystem::setDrivetrainPose));
 
         drivetrain.registerTelemetry(logger::telemeterize);
     }

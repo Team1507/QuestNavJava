@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.*;
+
 import java.util.List;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
@@ -21,6 +23,8 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
 
+import frc.robot.generated.TunerConstants;
+
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
  * constants. This class should not be used for any other purpose. All constants should be declared
@@ -30,6 +34,115 @@ import edu.wpi.first.math.util.Units;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
+
+    // ============================================================
+    //  SPEED PROFILES
+    //  Defines how fast the robot should move in different contexts.
+    //  - MATCH:   Real‑world competition speed (safe + realistic)
+    //  - SIM:     High-speed simulation mode (idealized physics)
+    // ============================================================
+    public enum SpeedProfile {
+        MATCH,
+        SIM
+    }
+
+    public static final class Speed {
+
+        // ------------------------------------------------------------
+        // TELEOP SCALING (Driver Controls)
+        // ------------------------------------------------------------
+        // These values scale the joystick inputs before they are sent
+        // to the drivetrain during teleop. They ONLY affect manual
+        // driving and have no impact on autonomous commands.
+        //
+        // Why scale teleop input?
+        //   - Prevents the robot from moving too fast during indoor
+        //     testing or tight‑space debugging.
+        //   - Allows full-speed control during matches.
+        //   - Lets simulation run at high speed without risk.
+        //
+        // Translation Scale:
+        //   - Controls forward/strafe speed from the left joystick.
+        //   - Real Robot: kept low for safety (0.15).
+        //   - Simulation: higher for convenience (0.9).
+        //
+        // Rotation Scale:
+        //   - Controls rotational speed from the right joystick.
+        //   - Real Robot: reduced for smoother control (0.25).
+        //   - Simulation: higher for fast testing (0.9).
+        // ------------------------------------------------------------
+
+        // Teleop translation scaling (driver control)
+        public static double getTranslationScale() {
+            return edu.wpi.first.wpilibj.RobotBase.isSimulation()
+                ? 1.5    // fast, convenient movement in simulation
+                : 0.15;  // safe, controlled speed on the real robot
+        }
+
+        // Teleop rotation scaling (driver control)
+        public static double getRotationScale() {
+            return edu.wpi.first.wpilibj.RobotBase.isSimulation()
+                ? 1.5    // fast rotation in simulation
+                : 0.25;  // smoother, safer rotation on real hardware
+        }
+
+        // ------------------------------------------------------------
+        // SPEED PROFILE SELECTION
+        // ------------------------------------------------------------
+        // Automatically selects the appropriate speed profile:
+        //   - SIM when running in WPILib simulation
+        //   - MATCH on the real robot
+        // ------------------------------------------------------------
+        public static final SpeedProfile PROFILE =
+            edu.wpi.first.wpilibj.RobotBase.isSimulation()
+                ? SpeedProfile.SIM
+                : SpeedProfile.MATCH;
+
+        // ------------------------------------------------------------
+        // MAX LINEAR SPEED
+        // ------------------------------------------------------------
+        // MATCH_MAX_SPEED:
+        //   - The real robot’s physical top speed.
+        //
+        // SIM_MAX_SPEED:
+        //   - A higher speed used only in simulation.
+        //   - Allows fast, idealized motion without real-world limits.
+        // ------------------------------------------------------------
+        public static final double MATCH_MAX_SPEED = 
+            TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
+
+        public static final double SIM_MAX_SPEED = 8.0;
+
+        // Returns the active max speed based on the current profile.
+        public static double getMaxSpeed() {
+            return switch (PROFILE) {
+                case MATCH -> MATCH_MAX_SPEED;
+                case SIM   -> SIM_MAX_SPEED;
+            };
+        }
+
+        // ------------------------------------------------------------
+        // MAX ANGULAR SPEED
+        // ------------------------------------------------------------
+        // MATCH_MAX_ANGULAR:
+        //   - Rotational speed for competition.
+        //
+        // SIM_MAX_ANGULAR:
+        //   - Very high rotational speed for simulation only.
+        // ------------------------------------------------------------
+        public static final double MATCH_MAX_ANGULAR =
+            RotationsPerSecond.of(0.75).in(RadiansPerSecond);
+
+        public static final double SIM_MAX_ANGULAR = Math.toRadians(720);
+
+        // Returns the active angular speed based on the current profile.
+        public static double getMaxAngularSpeed() {
+            return switch (PROFILE) {
+                case MATCH -> MATCH_MAX_ANGULAR;
+                case SIM   -> SIM_MAX_ANGULAR;
+            };
+        }
+    }
 
     public static final class RobotGeometry {
         public static final double HALF_LENGTH_METERS = 0.35; // half of robot length
@@ -46,12 +159,6 @@ public final class Constants {
                 new Translation3d(0.25, 0.20, 0.30), // meters: forward, left, up
                 new Rotation3d(0, 0, 0)     // radians: pitch, yaw, roll
             );
-
-    }
-
-    public static final class Drive {
-        public static final double TRANSLATION_SCALE    = 0.9;  // 0.15 // Input from X and Y controller to limit max speed from controller
-        public static final double ROTATION_SCALE       = 0.9;  // 0.25 // Input from X of controller to limit max speed from controller
     }
 
     public static final class Quest {
@@ -91,10 +198,8 @@ public final class Constants {
         public static final double THETA_KI = 0.0;
         public static final double THETA_KD = 0.0;
 
-        // --- Speed cap and deadband ---
-        public static final double MAX_LINEAR_SPEED     = 8;  // 2 m/s cap for testing
-        public static final double MAX_ANGULAR_SPEED    = 8;  // 3 rad/s cap for testing
-        public static final double DEADBAND_ERROR       = 8; // meters, near target
+        // --- Deadband ---
+        public static final double DEADBAND_ERROR       = 0.05; // meters, near target
 
         // --- Tolerances ---
         public static final double POSITION_TOLERANCE_METERS    = 0.05;
