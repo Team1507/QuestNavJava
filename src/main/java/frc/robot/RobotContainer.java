@@ -51,7 +51,7 @@ public class RobotContainer {
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
     public final QuestNavSubsystem questNavSubsystem = new QuestNavSubsystem(drivetrain, logger);
 
-    public final PhotonVisionSubsystem photonVisionSubsystem = new PhotonVisionSubsystem(drivetrain, logger, null);
+    public final PhotonVisionSubsystem photonVisionSubsystem = new PhotonVisionSubsystem(drivetrain, logger, "Limelight_2");
 
     
     public RobotContainer() {
@@ -90,15 +90,15 @@ public class RobotContainer {
 
         // Start moving to POSE_A when X is pressed 
         // checking for collisions and 2 waypoints to avoid obstacles
-        joystick.x().onTrue(new CmdMoveTrajectory(drivetrain, POSE_A));
+        // joystick.x().onTrue(new CmdMoveTrajectory(drivetrain, POSE_A));
 
         // Start moving to POSE_A when A is pressed 
         // using RRT & RRT* to plan an optimized path around obstacles
-        joystick.a().onTrue(new CmdMoveRRT(drivetrain, POSE_A));
+        // joystick.a().onTrue(new CmdMoveRRT(drivetrain, POSE_A));
 
         // Start moving to POSE_A when Y is pressed 
         // using point to point motion in a stright line
-        joystick.y().onTrue(new CmdMoveToPose(drivetrain, POSE_A));
+        // joystick.y().onTrue(new CmdMoveToPose(drivetrain, POSE_A));
         //joystick.x().onTrue(new CmdMoveToPose(drivetrain, POSE_B));
 
 
@@ -108,7 +108,7 @@ public class RobotContainer {
         }));
 
         // Set the robot pose to what PhotonVision reads
-        // joystick.y().onTrue(Commands.runOnce(photonVisionSubsystem::setDrivetrainPose));
+        joystick.y().onTrue(Commands.runOnce(photonVisionSubsystem::setDrivetrainPose));
 
         drivetrain.registerTelemetry(logger::telemeterize);
     }

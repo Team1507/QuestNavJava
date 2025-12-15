@@ -11,7 +11,7 @@ import org.photonvision.targeting.PhotonPipelineResult;
 
 // WPI libraries
 import edu.wpi.first.math.geometry.Pose2d;
-
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 // Vision base class
 import frc.robot.subsystems.vision.VisionSystem;
 
@@ -62,7 +62,12 @@ public class PhotonVisionSubsystem extends VisionSystem {
      */
     @Override
     protected void update() {
+
         PhotonPipelineResult result = camera.getLatestResult();
+        SmartDashboard.putBoolean("Has Target", result.hasTargets());
+        SmartDashboard.putNumber("PhotonVision Tag Count", result.getTargets().size());
+        SmartDashboard.putString("PhotonVision Pose", latestPose.toString());
+
 
         // Require at least 2 tags for reliability
         if (!result.hasTargets() || result.getTargets().size() < 2) {
@@ -71,12 +76,15 @@ public class PhotonVisionSubsystem extends VisionSystem {
         }
 
         Optional<EstimatedRobotPose> estimated = poseEstimator.update(result);
+        SmartDashboard.putBoolean("PhotonVision Pose Estimated", estimated.isPresent());
+
         if (estimated.isEmpty()) {
             latestPose = new Pose2d();
             return;
         }
 
         latestPose = estimated.get().estimatedPose.toPose2d();
+
 
         // If you want to fuse into drivetrain estimator:
         // drivetrain.addVisionMeasurement(latestPose, estimated.get().timestampSeconds, PHOTONVISION_STD_DEVS);

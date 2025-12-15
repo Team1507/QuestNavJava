@@ -1,6 +1,5 @@
 package frc.robot.subsystems;
 
-import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
 
