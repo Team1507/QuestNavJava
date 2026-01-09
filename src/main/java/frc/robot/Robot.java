@@ -77,8 +77,8 @@ public class Robot extends TimedRobot {
 
   public void WriteToSmartDashboard()
   {
-    SmartDashboard.putNumber("Quest Battery", m_robotContainer.questNavSubsystem.getBatteryPercent().getAsInt());
-    SmartDashboard.putBoolean("Quest Is Connected", m_robotContainer.questNavSubsystem.isConnected());
-    SmartDashboard.putBoolean("Quest Is Tracking", m_robotContainer.questNavSubsystem.isTracking());
+    //SmartDashboard.putNumber("Quest Battery", m_robotContainer.questNavSubsystem.getBatteryPercent().getAsInt());
+    //SmartDashboard.putBoolean("Quest Is Connected", m_robotContainer.questNavSubsystem.isConnected());
+    //SmartDashboard.putBoolean("Quest Is Tracking", m_robotContainer.questNavSubsystem.isTracking());
   }
 }

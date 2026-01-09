@@ -62,13 +62,15 @@ public class QuestNavSubsystem extends VisionSystem {
         // Fuse QuestNav into drivetrain estimator:
         // drivetrain.addVisionMeasurement(latestPose, questFrame.dataTimestamp(), QUESTNAV_STD_DEVS);
     }
-
-    /**
-     * Returns whether QuestNav currently has valid tracking data.
-     */
-    @Override
-    protected boolean hasValidData() {
-        return questNav.isTracking();
+    
+    public void addVisionMeasurementToDrivetrain() {
+        getLatestPose().ifPresent(pose -> {
+            drivetrain.addVisionMeasurement(
+                pose,
+                getLastPoseTimestamp(),
+                QUESTNAV_STD_DEVS
+            );
+        });
     }
 
     // -------------------------

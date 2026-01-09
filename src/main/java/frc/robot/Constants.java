@@ -156,9 +156,16 @@ public final class Constants {
         // Photon Vision
         public static final Transform3d CAMERA_TO_ROBOT =
             new Transform3d(
-                new Translation3d(0.25, 0.20, 0.30), // meters: forward, left, up
-                new Rotation3d(0, 0, 0)     // radians: pitch, yaw, roll
+                new Translation3d(0.381, 0.0, 0.1905), // meters: forward, left, up
+                new Rotation3d(0,0,0)     // radians: pitch, yaw, roll
             );
+
+        // Standard deviations for measurement trust
+        public static final Matrix<N3, N1> PHOTONVISION_STD_DEVS = VecBuilder.fill(
+            0.02,  // 2 cm X
+            0.02,  // 2 cm Y
+            0.035  // ~2 degrees
+        );
     }
 
     public static final class Quest {

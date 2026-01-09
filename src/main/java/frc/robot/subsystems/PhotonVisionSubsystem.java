@@ -1,8 +1,5 @@
 package frc.robot.subsystems;
 
-import java.util.Optional;
-
-// PhotonVision Libraries
 import org.photonvision.PhotonCamera;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonPoseEstimator;
@@ -12,6 +9,7 @@ import org.photonvision.targeting.PhotonPipelineResult;
 // WPI libraries
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
 // Vision base class
 import frc.robot.subsystems.vision.VisionSystem;
 
@@ -25,11 +23,11 @@ import static frc.robot.Constants.FieldElements.*;
 /**
  * VisionSystem implementation for PhotonVision.
  *
- * Responsible for:
- *  - Reading AprilTag detections from PhotonVision
- *  - Running the PhotonPoseEstimator
- *  - Updating latestPose for the VisionSystem base class
- *  - Enforcing multi-tag reliability filtering
+ * Responsibilities:
+ *  - Read AprilTag detections from PhotonVision
+ *  - Run PhotonPoseEstimator
+ *  - Accept or invalidate poses via VisionSystem helpers
+ *  - Publish diagnostics safely
  */
 public class PhotonVisionSubsystem extends VisionSystem {
 
@@ -43,58 +41,87 @@ public class PhotonVisionSubsystem extends VisionSystem {
      * @param logger     Telemetry logger for publishing vision poses.
      * @param cameraName The name of the camera as configured in PhotonVision UI.
      */
-    public PhotonVisionSubsystem(CommandSwerveDrivetrain drivetrain, Telemetry logger, String cameraName) {
+    public PhotonVisionSubsystem(
+        CommandSwerveDrivetrain drivetrain,
+        Telemetry logger,
+        String cameraName
+    ) {
         super(drivetrain, logger);
 
         this.camera = new PhotonCamera(cameraName);
 
-        // MULTI_TAG_PNP_ON_COPROCESSOR = best for accuracy and stability
         this.poseEstimator = new PhotonPoseEstimator(
             APRILTAG_LAYOUT,
-            PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
+            PoseStrategy.LOWEST_AMBIGUITY,
             CAMERA_TO_ROBOT
         );
     }
 
     /**
-     * Updates the latest pose from PhotonVision.
+     * Updates the vision pose.
      * Called automatically by VisionSystem.periodic().
      */
     @Override
     protected void update() {
 
         PhotonPipelineResult result = camera.getLatestResult();
-        SmartDashboard.putBoolean("Has Target", result.hasTargets());
-        SmartDashboard.putNumber("PhotonVision Tag Count", result.getTargets().size());
-        SmartDashboard.putString("PhotonVision Pose", latestPose.toString());
 
+        // ------------------------------------------------------------
+        // Basic diagnostics
+        // ------------------------------------------------------------
+        SmartDashboard.putBoolean("PhotonVision/HasTarget", result.hasTargets());
+        SmartDashboard.putNumber("PhotonVision/TagCount", result.getTargets().size());
 
-        // Require at least 2 tags for reliability
-        if (!result.hasTargets() || result.getTargets().size() < 2) {
-            latestPose = new Pose2d();
-            return;
+        // ------------------------------------------------------------
+        // Per‑target debug info (safe even if empty)
+        // ------------------------------------------------------------
+        for (var t : result.getTargets()) {
+            SmartDashboard.putNumber("Tag " + t.getFiducialId() + "/Yaw", t.getYaw());
+            SmartDashboard.putNumber("Tag " + t.getFiducialId() + "/Pitch", t.getPitch());
+            SmartDashboard.putNumber("Tag " + t.getFiducialId() + "/Area", t.getArea());
         }
 
-        Optional<EstimatedRobotPose> estimated = poseEstimator.update(result);
-        SmartDashboard.putBoolean("PhotonVision Pose Estimated", estimated.isPresent());
+        // ------------------------------------------------------------
+        // Ambiguity (guarded)
+        // ------------------------------------------------------------
+        if (result.hasTargets() && result.getBestTarget() != null) {
+            SmartDashboard.putNumber(
+                "PhotonVision/BestAmbiguity",
+                result.getBestTarget().getPoseAmbiguity()
+            );
+        } else {
+            SmartDashboard.putNumber("PhotonVision/BestAmbiguity", -1);
+        }
+
+        // ------------------------------------------------------------
+        // Pose estimation
+        // ------------------------------------------------------------
+        var estimated = poseEstimator.update(result);
+        SmartDashboard.putBoolean("PhotonVision/PoseEstimated", estimated.isPresent());
 
         if (estimated.isEmpty()) {
-            latestPose = new Pose2d();
+            invalidatePose();
             return;
         }
 
-        latestPose = estimated.get().estimatedPose.toPose2d();
+        EstimatedRobotPose pose = estimated.get();
 
-
-        // If you want to fuse into drivetrain estimator:
-        // drivetrain.addVisionMeasurement(latestPose, estimated.get().timestampSeconds, PHOTONVISION_STD_DEVS);
+        // ------------------------------------------------------------
+        // Accept pose
+        // ------------------------------------------------------------
+        acceptPose(
+            pose.estimatedPose.toPose2d(),
+            pose.timestampSeconds
+        );
     }
 
-    /**
-     * Returns whether PhotonVision currently has valid tracking data.
-     */
-    @Override
-    protected boolean hasValidData() {
-        return !latestPose.equals(new Pose2d());
+    public void addVisionMeasurementToDrivetrain() {
+        getLatestPose().ifPresent(pose -> {
+            drivetrain.addVisionMeasurement(
+                pose,
+                getLastPoseTimestamp(),
+                PHOTONVISION_STD_DEVS
+            );
+        });
     }
 }
