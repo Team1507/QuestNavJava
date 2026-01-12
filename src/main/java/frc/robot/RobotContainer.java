@@ -25,9 +25,7 @@ import static frc.robot.Constants.Speed.*;
 // Shooter model imports
 import frc.robot.shooter.data.PoseSupplier;
 import frc.robot.shooter.data.ShotTrainer;
-import frc.robot.shooter.model.ModelConfig;
 import frc.robot.shooter.model.ModelLoader;
-import frc.robot.shooter.model.RegressionShooterModel;
 import frc.robot.shooter.model.ShooterModel;
 
 // Robot Extra
