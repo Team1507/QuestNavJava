@@ -153,6 +153,9 @@ public final class Constants {
         // Controllers
         public static final int JOYSTICK_PORT = 0;
 
+        // Motors
+        public static final int SHOOTER_CAN_ID = 0;
+
         // Photon Vision
         public static final Transform3d CAMERA_TO_ROBOT =
             new Transform3d(
@@ -241,6 +244,19 @@ public final class Constants {
         public static final double CLEARANCE_Y = 1.5; // vertical margin
         public static final double CLEARANCE_X = 1.5; // lateral margin
         public static final List<Translation2d> REEF_HEX = List.of(
+            new Translation2d(4.5, 5.0),
+            new Translation2d(3.65, 4.4),
+            new Translation2d(3.65, 3.5),
+            new Translation2d(4.5, 3.0),
+            new Translation2d(5.35, 3.5),
+            new Translation2d(5.35, 4.4)
+        );
+
+        // --- Hub ---
+        public static final Translation2d HUB_POSE = new Translation2d(4.5, 4.0);
+        public static final double HUB_CLEARANCE_Y = 1.5; // vertical margin
+        public static final double HUB_CLEARANCE_X = 1.5; // lateral margin
+        public static final List<Translation2d> HUB_LIST = List.of(
             new Translation2d(4.5, 5.0),
             new Translation2d(3.65, 4.4),
             new Translation2d(3.65, 3.5),

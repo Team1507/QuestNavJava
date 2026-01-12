@@ -4,18 +4,31 @@
   // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
   "version": "0.2.0",
   "configurations": [
-
+    {
+      "type": "java",
+      "name": "SimpleModelTrainer",
+      "request": "launch",
+      "mainClass": "frc.robot.shooter.training.SimpleModelTrainer",
+      "projectName": "QuestNavJava"
+    },
+    {
+      "type": "java",
+      "name": "ModelTrainer",
+      "request": "launch",
+      "mainClass": "frc.robot.shooter.training.ModelTrainer",
+      "projectName": "QuestNavJava"
+    },
     {
       "type": "wpilib",
       "name": "WPILib Desktop Debug",
       "request": "launch",
-      "desktop": true,
+      "desktop": true
     },
     {
       "type": "wpilib",
       "name": "WPILib roboRIO Debug",
       "request": "launch",
-      "desktop": false,
+      "desktop": false
     }
   ]
 }
