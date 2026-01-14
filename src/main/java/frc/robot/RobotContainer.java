@@ -5,24 +5,28 @@ import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.ctre.phoenix6.hardware.TalonFX;
 
+// WPI libraries
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 // Robot Commands
 import frc.robot.commands.CmdMoveRRT;
+import frc.robot.commands.CmdShooterPIDTuner;
+
 // Robot Subsystems
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.PhotonVisionSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
 
-import static frc.robot.Constants.FieldElements.*;
 // Robot Constants
 import static frc.robot.Constants.IO.*;
 import static frc.robot.Constants.MoveToPose.*;
 import static frc.robot.Constants.Speed.*;
+import static frc.robot.Constants.FieldElements.*;
 
 // Shooter model imports
 import frc.robot.shooter.data.PoseSupplier;
@@ -172,6 +176,12 @@ public class RobotContainer {
         );
 
         drivetrain.registerTelemetry(logger::telemeterize);
+
+        // PID Tuner
+        SmartDashboard.putData( 
+            "Run Shooter PID Tuner",
+            new CmdShooterPIDTuner(shooterSubsystem, 4095) // max RPM here
+        );
     }
 
     public Command getAutonomousCommand() {

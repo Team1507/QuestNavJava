@@ -1,0 +1,332 @@
+=== Shooter PID Tuning Test Starting ===
+
+=== Shooter PID Phase Report ===
+Phase: SLOW_UP_STEP
+  Target: 819.0 RPM
+  Overshoot: 3572.16496639836 RPM
+  Rise time: 0.3596030000000008 s
+  Settling time: 2.0998410000000005 s
+  Oscillation duration: 0.0 s (0 crossings)
+  Recommendation: Reduce Kp by ~10–20% or increase Kd slightly.
+--------------------------------
+
+=== Shooter PID Phase Report ===
+Phase: SLOW_UP_STEP
+  Target: 1638.0 RPM
+  Overshoot: 0.0 RPM
+  Rise time: 2.09825 s
+  Settling time: 2.09825 s
+  Oscillation duration: 0.0 s (0 crossings)
+  Recommendation: Increase Kp by ~10%.
+--------------------------------
+
+=== Shooter PID Phase Report ===
+Phase: SLOW_UP_STEP
+  Target: 2457.0 RPM
+  Overshoot: 0.0 RPM
+  Rise time: 2.0997269999999997 s
+  Settling time: 2.0997269999999997 s
+  Oscillation duration: 0.0 s (0 crossings)
+  Recommendation: Increase Kp by ~10%.
+--------------------------------
+
+=== Shooter PID Phase Report ===
+Phase: SLOW_UP_STEP
+  Target: 3276.0 RPM
+  Overshoot: 0.0 RPM
+  Rise time: 2.098817999999998 s
+  Settling time: 2.098817999999998 s
+  Oscillation duration: 0.0 s (0 crossings)
+  Recommendation: Increase Kp by ~10%.
+--------------------------------
+
+=== Shooter PID Phase Report ===
+Phase: SLOW_UP_STEP
+  Target: 4095.0 RPM
+  Overshoot: 0.0 RPM
+  Rise time: 2.100127999999998 s
+  Settling time: 2.100127999999998 s
+  Oscillation duration: 0.0 s (0 crossings)
+  Recommendation: Increase Kp by ~10%.
+--------------------------------
+
+=== Shooter PID Phase Report ===
+Phase: SLOW_DOWN_STEP
+  Target: 3276.0 RPM
+  Overshoot: 818.6201811428637 RPM
+  Rise time: 2.0997929999999982 s
+  Settling time: 2.0997929999999982 s
+  Oscillation duration: 0.0 s (0 crossings)
+  Recommendation: Reduce Kp by ~10–20% or increase Kd slightly.
+--------------------------------
+
+=== Shooter PID Phase Report ===
+Phase: SLOW_DOWN_STEP
+  Target: 2457.0 RPM
+  Overshoot: 819.3427359659822 RPM
+  Rise time: 2.1001469999999998 s
+  Settling time: 2.1001469999999998 s
+  Oscillation duration: 0.0 s (0 crossings)
+  Recommendation: Reduce Kp by ~10–20% or increase Kd slightly.
+--------------------------------
+
+=== Shooter PID Phase Report ===
+Phase: SLOW_DOWN_STEP
+  Target: 1638.0 RPM
+  Overshoot: 819.342342076679 RPM
+  Rise time: 2.099716000000001 s
+  Settling time: 2.099716000000001 s
+  Oscillation duration: 0.0 s (0 crossings)
+  Recommendation: Reduce Kp by ~10–20% or increase Kd slightly.
+--------------------------------
+
+=== Shooter PID Phase Report ===
+Phase: SLOW_DOWN_STEP
+  Target: 819.0 RPM
+  Overshoot: 819.3425925602714 RPM
+  Rise time: 2.0980559999999997 s
+  Settling time: 2.0980559999999997 s
+  Oscillation duration: 0.0 s (0 crossings)
+  Recommendation: Reduce Kp by ~10–20% or increase Kd slightly.
+--------------------------------
+
+=== Shooter PID Phase Report ===
+Phase: SLOW_DOWN_STEP
+  Target: 0.0 RPM
+  Overshoot: 819.3444786656511 RPM
+  Rise time: 2.1001370000000037 s
+  Settling time: 2.1001370000000037 s
+  Oscillation duration: 0.0 s (0 crossings)
+  Recommendation: Reduce Kp by ~10–20% or increase Kd slightly.
+--------------------------------
+
+=== Shooter PID Phase Report ===
+Phase: FAST_SPIKE_MAX
+  Target: 4095.0 RPM
+  Overshoot: 0.0 RPM
+  Rise time: 0.8597570000000019 s
+  Settling time: 0.8597570000000019 s
+  Oscillation duration: 0.0 s (0 crossings)
+  Recommendation: Increase Kp by ~10%.
+--------------------------------
+
+=== Shooter PID Phase Report ===
+Phase: SLOW_DOWN_STEP
+  Target: 4095.0 RPM
+  Overshoot: 0.0 RPM
+  Rise time: 0.01960499999999854 s
+  Settling time: -1.0 s
+  Oscillation duration: 0.0 s (0 crossings)
+  Recommendation: Response looks stable. PID values appear well-tuned.
+--------------------------------
+
+=== Shooter PID Phase Report ===
+Phase: SLOW_DOWN_STEP
+  Target: 3276.0 RPM
+  Overshoot: 818.9999999985107 RPM
+  Rise time: 2.0994349999999997 s
+  Settling time: 2.0994349999999997 s
+  Oscillation duration: 0.0 s (0 crossings)
+  Recommendation: Reduce Kp by ~10–20% or increase Kd slightly.
+--------------------------------
+
+=== Shooter PID Phase Report ===
+Phase: SLOW_DOWN_STEP
+  Target: 2457.0 RPM
+  Overshoot: 819.34285355663 RPM
+  Rise time: 2.100177000000002 s
+  Settling time: 2.100177000000002 s
+  Oscillation duration: 0.0 s (0 crossings)
+  Recommendation: Reduce Kp by ~10–20% or increase Kd slightly.
+--------------------------------
+
+=== Shooter PID Phase Report ===
+Phase: SLOW_DOWN_STEP
+  Target: 1638.0 RPM
+  Overshoot: 819.3428978383968 RPM
+  Rise time: 2.1003510000000034 s
+  Settling time: 2.1003510000000034 s
+  Oscillation duration: 0.0 s (0 crossings)
+  Recommendation: Reduce Kp by ~10–20% or increase Kd slightly.
+--------------------------------
+
+=== Shooter PID Phase Report ===
+Phase: SLOW_DOWN_STEP
+  Target: 819.0 RPM
+  Overshoot: 819.3422623194153 RPM
+  Rise time: 2.0997350000000026 s
+  Settling time: 2.0997350000000026 s
+  Oscillation duration: 0.0 s (0 crossings)
+  Recommendation: Reduce Kp by ~10–20% or increase Kd slightly.
+--------------------------------
+
+=== Shooter PID Phase Report ===
+Phase: RECOVER1_SPIKE_MAX
+  Target: 4095.0 RPM
+  Overshoot: 0.0 RPM
+  Rise time: 0.8200099999999964 s
+  Settling time: 0.8200099999999964 s
+  Oscillation duration: 0.0 s (0 crossings)
+  Recommendation: Increase Kp by ~10%.
+--------------------------------
+
+=== Shooter PID Phase Report ===
+Phase: SLOW_DOWN_STEP
+  Target: 4095.0 RPM
+  Overshoot: 0.0 RPM
+  Rise time: 0.020573000000005948 s
+  Settling time: -1.0 s
+  Oscillation duration: 0.0 s (0 crossings)
+  Recommendation: Response looks stable. PID values appear well-tuned.
+--------------------------------
+
+=== Shooter PID Phase Report ===
+Phase: SLOW_DOWN_STEP
+  Target: 3276.0 RPM
+  Overshoot: 818.9999999989295 RPM
+  Rise time: 2.098854000000003 s
+  Settling time: 2.098854000000003 s
+  Oscillation duration: 0.0 s (0 crossings)
+  Recommendation: Reduce Kp by ~10–20% or increase Kd slightly.
+--------------------------------
+
+=== Shooter PID Phase Report ===
+Phase: SLOW_DOWN_STEP
+  Target: 2457.0 RPM
+  Overshoot: 819.3424016249669 RPM
+  Rise time: 2.0992650000000026 s
+  Settling time: 2.0992650000000026 s
+  Oscillation duration: 0.0 s (0 crossings)
+  Recommendation: Reduce Kp by ~10–20% or increase Kd slightly.
+--------------------------------
+
+=== Shooter PID Phase Report ===
+Phase: SLOW_DOWN_STEP
+  Target: 1638.0 RPM
+  Overshoot: 819.3809016504988 RPM
+  Rise time: 2.099580000000003 s
+  Settling time: 2.099580000000003 s
+  Oscillation duration: 0.0 s (0 crossings)
+  Recommendation: Reduce Kp by ~10–20% or increase Kd slightly.
+--------------------------------
+
+=== Shooter PID Phase Report ===
+Phase: SLOW_DOWN_STEP
+  Target: 819.0 RPM
+  Overshoot: 819.3433050046742 RPM
+  Rise time: 2.0996549999999985 s
+  Settling time: 2.0996549999999985 s
+  Oscillation duration: 0.0 s (0 crossings)
+  Recommendation: Reduce Kp by ~10–20% or increase Kd slightly.
+--------------------------------
+
+=== Shooter PID Phase Report ===
+Phase: RECOVER2_SPIKE_4_5
+  Target: 3276.0 RPM
+  Overshoot: 0.0 RPM
+  Rise time: 0.7592429999999979 s
+  Settling time: 0.7592429999999979 s
+  Oscillation duration: 0.0 s (0 crossings)
+  Recommendation: Response looks stable. PID values appear well-tuned.
+--------------------------------
+
+=== Shooter PID Phase Report ===
+Phase: SLOW_DOWN_STEP
+  Target: 3276.0 RPM
+  Overshoot: 0.0 RPM
+  Rise time: 0.019450000000006185 s
+  Settling time: -1.0 s
+  Oscillation duration: 0.0 s (0 crossings)
+  Recommendation: Response looks stable. PID values appear well-tuned.
+--------------------------------
+
+=== Shooter PID Phase Report ===
+Phase: SLOW_DOWN_STEP
+  Target: 2457.0 RPM
+  Overshoot: 818.9999999992742 RPM
+  Rise time: 2.098737 s
+  Settling time: 2.098737 s
+  Oscillation duration: 0.0 s (0 crossings)
+  Recommendation: Reduce Kp by ~10–20% or increase Kd slightly.
+--------------------------------
+
+=== Shooter PID Phase Report ===
+Phase: SLOW_DOWN_STEP
+  Target: 1638.0 RPM
+  Overshoot: 819.3431205615971 RPM
+  Rise time: 2.100110000000001 s
+  Settling time: 2.100110000000001 s
+  Oscillation duration: 0.0 s (0 crossings)
+  Recommendation: Reduce Kp by ~10–20% or increase Kd slightly.
+--------------------------------
+
+=== Shooter PID Phase Report ===
+Phase: SLOW_DOWN_STEP
+  Target: 819.0 RPM
+  Overshoot: 819.3424264463395 RPM
+  Rise time: 2.0995360000000005 s
+  Settling time: 2.0995360000000005 s
+  Oscillation duration: 0.0 s (0 crossings)
+  Recommendation: Reduce Kp by ~10–20% or increase Kd slightly.
+--------------------------------
+
+=== Shooter PID Phase Report ===
+Phase: RECOVER3_SPIKE_4_5_REPEAT
+  Target: 3276.0 RPM
+  Overshoot: 0.0 RPM
+  Rise time: 0.7591550000000069 s
+  Settling time: 0.7591550000000069 s
+  Oscillation duration: 0.0 s (0 crossings)
+  Recommendation: Response looks stable. PID values appear well-tuned.
+--------------------------------
+
+=== Shooter PID Phase Report ===
+Phase: SLOW_DOWN_STEP
+  Target: 3276.0 RPM
+  Overshoot: 0.0 RPM
+  Rise time: 0.019216999999997597 s
+  Settling time: -1.0 s
+  Oscillation duration: 0.0 s (0 crossings)
+  Recommendation: Response looks stable. PID values appear well-tuned.
+--------------------------------
+
+=== Shooter PID Phase Report ===
+Phase: SLOW_DOWN_STEP
+  Target: 2457.0 RPM
+  Overshoot: 818.9999999992733 RPM
+  Rise time: 2.100141999999991 s
+  Settling time: 2.100141999999991 s
+  Oscillation duration: 0.0 s (0 crossings)
+  Recommendation: Reduce Kp by ~10–20% or increase Kd slightly.
+--------------------------------
+
+=== Shooter PID Phase Report ===
+Phase: SLOW_DOWN_STEP
+  Target: 1638.0 RPM
+  Overshoot: 819.3418588673494 RPM
+  Rise time: 2.1001310000000046 s
+  Settling time: 2.1001310000000046 s
+  Oscillation duration: 0.0 s (0 crossings)
+  Recommendation: Reduce Kp by ~10–20% or increase Kd slightly.
+--------------------------------
+
+=== Shooter PID Phase Report ===
+Phase: SLOW_DOWN_STEP
+  Target: 819.0 RPM
+  Overshoot: 819.3804012916521 RPM
+  Rise time: 2.0994540000000086 s
+  Settling time: 2.0994540000000086 s
+  Oscillation duration: 0.0 s (0 crossings)
+  Recommendation: Reduce Kp by ~10–20% or increase Kd slightly.
+--------------------------------
+
+=== Shooter PID Phase Report ===
+Phase: SLOW_DOWN_STEP
+  Target: 0.0 RPM
+  Overshoot: 819.3429738169716 RPM
+  Rise time: 2.0993899999999996 s
+  Settling time: 2.0993899999999996 s
+  Oscillation duration: 0.0 s (0 crossings)
+  Recommendation: Reduce Kp by ~10–20% or increase Kd slightly.
+--------------------------------
+

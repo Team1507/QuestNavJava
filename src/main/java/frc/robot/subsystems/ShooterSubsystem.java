@@ -1,10 +1,13 @@
 package frc.robot.subsystems;
 
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.controls.VelocityDutyCycle;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 // Shooter Model
@@ -14,24 +17,72 @@ import frc.robot.shooter.model.ShooterModel;
 
 public class ShooterSubsystem extends SubsystemBase {
 
+    // -----------------------------
+    // Hardware
+    // -----------------------------
     private final TalonFX shooterMotor;
-    private final VelocityDutyCycle velocityRequest = new VelocityDutyCycle(0);
+    private final VelocityDutyCycle velocityRequest = new VelocityDutyCycle(0).withSlot(0);
 
+    // -----------------------------
+    // Model-driven shooter fields
+    // -----------------------------
     private final ShooterModel model;
     private final PoseSupplier poseSupplier;
     private Translation2d targetPose;
 
     private double targetRPM = 0.0;
 
-    public ShooterSubsystem(TalonFX shooterMotor, ShooterModel model, PoseSupplier poseSupplier, Translation2d targetPose) {
+    // -----------------------------
+    // Simulation fields
+    // -----------------------------
+    private boolean simulate = RobotBase.isSimulation();
+;
+    private double simulatedRPM = 0.0;
+
+    public ShooterSubsystem(
+        TalonFX shooterMotor,
+        ShooterModel model,
+        PoseSupplier poseSupplier,
+        Translation2d targetPose
+    ) {
         this.shooterMotor = shooterMotor;
         this.model = model;
         this.poseSupplier = poseSupplier;
         this.targetPose = targetPose;
-    }    
+
+        configurePID();
+    }
+
+    // -----------------------------
+    // PID Configuration
+    // -----------------------------
+    private void configurePID() {
+        TalonFXConfiguration cfg = new TalonFXConfiguration();
+        // Slot0 PID values (starting point)
+        cfg.Slot0.kP = 0.10;
+        cfg.Slot0.kI = 0.0;
+        cfg.Slot0.kD = 0.0;
+        // Optional: feedforward (helps shooters a LOT)
+        cfg.Slot0.kV = 0.12;
+        // adjust later
+        cfg.Slot0.kS = 0.0;
+        shooterMotor.getConfigurator().apply(cfg);
+    }
 
     public TalonFX getShooterMotor() {
         return shooterMotor;
+    }
+
+    // -----------------------------
+    // Simulation toggle
+    // -----------------------------
+    public void setSimulate(boolean enable) {
+        this.simulate = enable;
+        SmartDashboard.putBoolean("Shooter Simulate", simulate);
+    }
+
+    public boolean isSimulating() {
+        return simulate;
     }
 
     // -----------------------------
@@ -39,33 +90,44 @@ public class ShooterSubsystem extends SubsystemBase {
     // -----------------------------
 
     public double getShooterRPM() {
-        return shooterMotor.getVelocity().getValueAsDouble();
+        return simulate
+            ? simulatedRPM
+            : shooterMotor.getVelocity().getValueAsDouble();
     }
 
     public double getShooterVoltage() {
+        if (simulate) {
+            // Fake voltage proportional to effort
+            return 12.0 * Math.min(1.0, Math.abs(targetRPM) / 5000.0);
+        }
         return shooterMotor.getMotorVoltage().getValueAsDouble();
     }
 
     public double getStatorCurrent() {
+        if (simulate) {
+            // Fake current: increases with RPM
+            return 5.0 + (Math.abs(simulatedRPM) / 1000.0);
+        }
         return shooterMotor.getStatorCurrent().getValueAsDouble();
     }
 
     public double getSupplyCurrent() {
-        return shooterMotor.getSupplyCurrent().getValueAsDouble();
+        return simulate
+            ? getStatorCurrent()
+            : shooterMotor.getSupplyCurrent().getValueAsDouble();
     }
 
     public double getClosedLoopError() {
-        return shooterMotor.getClosedLoopError().getValueAsDouble();
+        return targetRPM - getShooterRPM();
     }
 
     // -----------------------------
     // Build ShotRecord for model
     // -----------------------------
-
     private ShotRecord buildTelemetry() {
         Pose2d pose = poseSupplier.getPose();
         double distance = pose.getTranslation().getDistance(targetPose);
-    
+
         return new ShotRecord(
             getShooterRPM(),
             getShooterVoltage(),
@@ -75,12 +137,11 @@ public class ShooterSubsystem extends SubsystemBase {
             pose,
             distance
         );
-    }    
+    }
 
     // -----------------------------
     // Model-driven shooter update
     // -----------------------------
-
     public void updateShooterFromModel() {
         ShotRecord telemetry = buildTelemetry();
         double rpm = model.getRPM(telemetry);
@@ -90,10 +151,12 @@ public class ShooterSubsystem extends SubsystemBase {
     // -----------------------------
     // Shooter control
     // -----------------------------
-
     public void setTargetRPM(double rpm) {
         this.targetRPM = rpm;
-        shooterMotor.setControl(velocityRequest.withVelocity(rpm));
+
+        if (!simulate) {
+            shooterMotor.setControl(velocityRequest.withVelocity(rpm));
+        }
     }
 
     public double getTargetRPM() {
@@ -103,13 +166,23 @@ public class ShooterSubsystem extends SubsystemBase {
     public void setTargetPose(Translation2d newTarget) {
         this.targetPose = newTarget;
     }
-    
+
     // -----------------------------
     // Periodic
     // -----------------------------
-
     @Override
     public void periodic() {
-        shooterMotor.setControl(velocityRequest.withVelocity(targetRPM));
+
+        // Update simulation toggle from dashboard
+        simulate = SmartDashboard.getBoolean("Shooter Simulate", simulate);
+
+        if (simulate) {
+            // Simple flywheel simulation: exponential approach
+            double alpha = 0.10; // responsiveness factor
+            simulatedRPM += (targetRPM - simulatedRPM) * alpha;
+        } else {
+            // Real hardware control
+            shooterMotor.setControl(velocityRequest.withVelocity(targetRPM));
+        }
     }
 }
