@@ -46,7 +46,7 @@ public class CSVWriter {
                 r.statorCurrent + "," +
                 r.supplyCurrent + "," +
                 r.closedLoopError + "," +
-                r.distanceToHub + "," +
+                r.distanceToTarget + "," +
                 r.made + "," +
                 r.missAmount + "," +
                 r.pressDuration + "," +

@@ -17,6 +17,8 @@ import frc.robot.commands.CmdMoveRRT;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.PhotonVisionSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
+
+import static frc.robot.Constants.FieldElements.*;
 // Robot Constants
 import static frc.robot.Constants.IO.*;
 import static frc.robot.Constants.MoveToPose.*;
@@ -56,11 +58,20 @@ public class RobotContainer {
     private final ShooterModel shooterModelConfig =
         ModelLoader.load("model.json", poseSupplier);
 
-    public final ShooterSubsystem shooterSubsystem =
-        new ShooterSubsystem(new TalonFX(SHOOTER_CAN_ID), shooterModelConfig, poseSupplier);
+        public final ShooterSubsystem shooterSubsystem =
+            new ShooterSubsystem(
+                new TalonFX(SHOOTER_CAN_ID),
+                shooterModelConfig,
+                poseSupplier,
+                HUB_POSE // default target
+            );
 
-    public final ShotTrainer shotTrainer =
-        new ShotTrainer(shooterSubsystem.getShooterMotor(), poseSupplier);
+        public final ShotTrainer shotTrainer =
+            new ShotTrainer(
+                shooterSubsystem.getShooterMotor(),
+                poseSupplier,
+                HUB_POSE
+            );    
 
     // -----------------------------
 
@@ -128,9 +139,31 @@ public class RobotContainer {
             CommandScheduler.getInstance().cancelAll();
         }));
 
-        // Shooter sim visualization
+        // Shooter Target Update
+        // Right bumper → shoot at HUB_POSE
+        joystick.rightBumper().onTrue(
+            Commands.runOnce(() -> shooterSubsystem.setTargetPose(HUB_POSE))
+        );
+
+        // Right trigger → shoot at SHOT_A_POSE
         joystick.rightTrigger().onTrue(
-            new FuelSimulator(shooterSubsystem, poseSupplier, shotTrainer)
+            Commands.runOnce(() -> shooterSubsystem.setTargetPose(SHOT_A_POSE))
+        );
+
+        // Left trigger → shoot at SHOT_B_POSE
+        joystick.leftTrigger().onTrue(
+            Commands.runOnce(() -> shooterSubsystem.setTargetPose(SHOT_B_POSE))
+        );
+
+        // Shooter sim visualization
+        joystick.rightBumper().onTrue(
+            new FuelSimulator(shooterSubsystem, poseSupplier, shotTrainer, HUB_POSE)
+        );
+        joystick.rightTrigger().onTrue(
+            new FuelSimulator(shooterSubsystem, poseSupplier, shotTrainer, SHOT_A_POSE)
+        );
+        joystick.leftTrigger().onTrue(
+            new FuelSimulator(shooterSubsystem, poseSupplier, shotTrainer, SHOT_B_POSE)
         );
 
         // Vision pose reset

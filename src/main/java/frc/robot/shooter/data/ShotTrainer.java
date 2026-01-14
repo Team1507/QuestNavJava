@@ -7,15 +7,16 @@ import java.util.List;
 import com.ctre.phoenix6.hardware.TalonFX;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
-
-import static frc.robot.Constants.FieldElements.*;
 
 public class ShotTrainer {
 
     private final TalonFX shooterMotor;
     private final PoseSupplier poseSupplier;
+    private Translation2d targetPose;
+
 
     private int nextShotId = 0;
 
@@ -28,9 +29,10 @@ public class ShotTrainer {
             .getTable("Shooter")
             .getSubTable("UnlabeledShots");
 
-    public ShotTrainer(TalonFX shooterMotor, PoseSupplier poseSupplier) {
+    public ShotTrainer(TalonFX shooterMotor, PoseSupplier poseSupplier, Translation2d targetPose) {
         this.shooterMotor = shooterMotor;
         this.poseSupplier = poseSupplier;
+        this.targetPose = targetPose;
     }
 
     public void notifyShotFired(double timestampSeconds) {
@@ -40,7 +42,7 @@ public class ShotTrainer {
     private void recordShot(double timestampSeconds) {
 
         Pose2d pose = poseSupplier.getPose();
-        double distance = pose.getTranslation().getDistance(HUB_POSE);
+        double distance = pose.getTranslation().getDistance(targetPose);
 
         double rpm = shooterMotor.getClosedLoopReference().getValueAsDouble();
 
@@ -51,8 +53,9 @@ public class ShotTrainer {
             shooterMotor.getSupplyCurrent().getValueAsDouble(),
             shooterMotor.getClosedLoopError().getValueAsDouble(),
             pose,
-            distance
+            distance // now distanceToTarget
         );
+
 
         record.id = nextShotId++;
         pendingShots.add(record);
@@ -65,14 +68,14 @@ public class ShotTrainer {
         NetworkTable t = rootTable.getSubTable(Integer.toString(r.id));
 
         t.getEntry("id").setDouble(r.id);
-        t.getEntry("distance").setDouble(r.distanceToHub);
+        t.getEntry("distance").setDouble(r.distanceToTarget);
         t.getEntry("rpm").setDouble(r.shooterRPM);
         t.getEntry("stator").setDouble(r.statorCurrent);
         t.getEntry("supply").setDouble(r.supplyCurrent);
         t.getEntry("error").setDouble(r.closedLoopError);
 
         // Elastic dropdown
-        t.getEntry("label").setString("unlabeled");
+        t.getEntry("distance").setDouble(r.distanceToTarget);
     }
 
     public void update() {

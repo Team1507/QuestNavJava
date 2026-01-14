@@ -11,13 +11,12 @@ import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.shooter.data.PoseSupplier;
 import frc.robot.shooter.data.ShotTrainer;
 
-import static frc.robot.Constants.FieldElements.*;
-
 public class FuelSimulator extends Command {
 
     private final ShooterSubsystem shooter;
     private final PoseSupplier poseSupplier;
     private final ShotTrainer shotTrainer;
+    private final Translation2d locationShot;
 
     private final Timer timer = new Timer();
 
@@ -29,11 +28,13 @@ public class FuelSimulator extends Command {
     public FuelSimulator(
         ShooterSubsystem shooter,
         PoseSupplier poseSupplier,
-        ShotTrainer shotTrainer
+        ShotTrainer shotTrainer,
+        Translation2d locationShot
     ) {
         this.shooter = shooter;
         this.poseSupplier = poseSupplier;
         this.shotTrainer = shotTrainer;
+        this.locationShot = locationShot;
     }
 
     @Override
@@ -47,7 +48,7 @@ public class FuelSimulator extends Command {
         Pose2d robotPose = poseSupplier.getPose();
 
         // Compute direction toward hub
-        Translation2d toHub = HUB_POSE.minus(robotPose.getTranslation());
+        Translation2d toHub = locationShot.minus(robotPose.getTranslation());
         double norm = toHub.getNorm();
         Translation2d direction = (norm > 1e-6)
             ? new Translation2d(toHub.getX() / norm, toHub.getY() / norm)

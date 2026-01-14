@@ -17,7 +17,7 @@ public class QuadraticShooterModel implements ShooterModel {
     @Override
     public double getRPM(ShotRecord telemetry) {
 
-        double d = telemetry.distanceToHub;
+        double d = telemetry.distanceToTarget;
 
         // Quadratic model:
         // rpm = b*d^2 + a*d + g

@@ -264,5 +264,8 @@ public final class Constants {
             new Translation2d(5.35, 3.5),
             new Translation2d(5.35, 4.4)
         );
+
+        public static final Translation2d SHOT_A_POSE = new Translation2d(1.0, 1.0);
+        public static final Translation2d SHOT_B_POSE = new Translation2d(1.0, 7.0);
     }
 }

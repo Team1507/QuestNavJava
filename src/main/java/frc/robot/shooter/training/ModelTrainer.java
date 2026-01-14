@@ -23,7 +23,7 @@ public class ModelTrainer {
         for (int i = 0; i < n; i++) {
             ShotRecord r = records.get(i);
 
-            X[i][0] = r.distanceToHub;
+            X[i][0] = r.distanceToTarget;
             X[i][1] = r.statorCurrent;
             X[i][2] = r.supplyCurrent;
             X[i][3] = r.closedLoopError;

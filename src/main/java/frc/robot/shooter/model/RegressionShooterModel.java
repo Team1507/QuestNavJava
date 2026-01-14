@@ -31,7 +31,7 @@ public class RegressionShooterModel implements ShooterModel {
     public double getRPM(ShotRecord telemetry) {
 
         // Compute distance from robot pose to hub
-        double distance = telemetry.distanceToHub;
+        double distance = telemetry.distanceToTarget;
 
         // Extract telemetry
         double stator = telemetry.statorCurrent;

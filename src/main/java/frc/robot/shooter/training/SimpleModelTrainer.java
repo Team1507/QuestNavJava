@@ -25,7 +25,7 @@ public class SimpleModelTrainer {
         for (int i = 0; i < n; i++) {
             ShotRecord r = records.get(i);
 
-            double d = r.distanceToHub;
+            double d = r.distanceToTarget;
 
             X[i][0] = d;        // linear term
             X[i][1] = d * d;    // quadratic term

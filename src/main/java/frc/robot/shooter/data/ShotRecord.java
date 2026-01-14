@@ -14,7 +14,7 @@ public class ShotRecord {
     public final double closedLoopError;
 
     public final Pose2d robotPose;
-    public final double distanceToHub;
+    public final double distanceToTarget;
 
     public boolean made;
     public double missAmount;
@@ -30,7 +30,7 @@ public class ShotRecord {
         double supplyCurrent,
         double closedLoopError,
         Pose2d pose,
-        double distanceToHub
+        double distanceToTarget
     ) {
         this.shooterRPM = rpm;
         this.shooterVoltage = voltage;
@@ -39,7 +39,7 @@ public class ShotRecord {
         this.closedLoopError = closedLoopError;
 
         this.robotPose = pose;
-        this.distanceToHub = distanceToHub;
+        this.distanceToTarget = distanceToTarget;
     }
 
     public void setLabel(boolean made, double missAmount) {

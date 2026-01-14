@@ -3,15 +3,14 @@ package frc.robot.subsystems;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.controls.VelocityDutyCycle;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 // Shooter Model
 import frc.robot.shooter.data.PoseSupplier;
 import frc.robot.shooter.data.ShotRecord;
 import frc.robot.shooter.model.ShooterModel;
-
-// Constants
-import static frc.robot.Constants.FieldElements.*;
 
 public class ShooterSubsystem extends SubsystemBase {
 
@@ -20,14 +19,16 @@ public class ShooterSubsystem extends SubsystemBase {
 
     private final ShooterModel model;
     private final PoseSupplier poseSupplier;
+    private Translation2d targetPose;
 
     private double targetRPM = 0.0;
 
-    public ShooterSubsystem(TalonFX shooterMotor, ShooterModel model, PoseSupplier poseSupplier) {
+    public ShooterSubsystem(TalonFX shooterMotor, ShooterModel model, PoseSupplier poseSupplier, Translation2d targetPose) {
         this.shooterMotor = shooterMotor;
         this.model = model;
         this.poseSupplier = poseSupplier;
-    }
+        this.targetPose = targetPose;
+    }    
 
     public TalonFX getShooterMotor() {
         return shooterMotor;
@@ -62,16 +63,19 @@ public class ShooterSubsystem extends SubsystemBase {
     // -----------------------------
 
     private ShotRecord buildTelemetry() {
+        Pose2d pose = poseSupplier.getPose();
+        double distance = pose.getTranslation().getDistance(targetPose);
+    
         return new ShotRecord(
             getShooterRPM(),
             getShooterVoltage(),
             getStatorCurrent(),
             getSupplyCurrent(),
             getClosedLoopError(),
-            poseSupplier.getPose(),
-            poseSupplier.getPose().getTranslation().getDistance(HUB_POSE)
+            pose,
+            distance
         );
-    }
+    }    
 
     // -----------------------------
     // Model-driven shooter update
@@ -96,6 +100,10 @@ public class ShooterSubsystem extends SubsystemBase {
         return targetRPM;
     }
 
+    public void setTargetPose(Translation2d newTarget) {
+        this.targetPose = newTarget;
+    }
+    
     // -----------------------------
     // Periodic
     // -----------------------------
