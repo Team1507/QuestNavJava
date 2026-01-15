@@ -2,7 +2,7 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.controls.VelocityDutyCycle;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -21,7 +21,8 @@ public class ShooterSubsystem extends SubsystemBase {
     // Hardware
     // -----------------------------
     private final TalonFX shooterMotor;
-    private final VelocityDutyCycle velocityRequest = new VelocityDutyCycle(0).withSlot(0);
+    private final VelocityVoltage velocityRequest = 
+        new VelocityVoltage(0).withSlot(0);
 
     // -----------------------------
     // Model-driven shooter fields
