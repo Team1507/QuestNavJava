@@ -5,7 +5,6 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -29,7 +28,7 @@ public class ShooterSubsystem extends SubsystemBase {
     // -----------------------------
     private final ShooterModel model;
     private final PoseSupplier poseSupplier;
-    private Translation2d targetPose;
+    private Pose2d targetPose;
 
     private double targetRPM = 0.0;
 
@@ -44,7 +43,7 @@ public class ShooterSubsystem extends SubsystemBase {
         TalonFX shooterMotor,
         ShooterModel model,
         PoseSupplier poseSupplier,
-        Translation2d targetPose
+        Pose2d targetPose
     ) {
         this.shooterMotor = shooterMotor;
         this.model = model;
@@ -127,7 +126,7 @@ public class ShooterSubsystem extends SubsystemBase {
     // -----------------------------
     private ShotRecord buildTelemetry() {
         Pose2d pose = poseSupplier.getPose();
-        double distance = pose.getTranslation().getDistance(targetPose);
+        double distance = pose.getTranslation().getDistance(targetPose.getTranslation());
 
         return new ShotRecord(
             getShooterRPM(),
@@ -164,7 +163,7 @@ public class ShooterSubsystem extends SubsystemBase {
         return targetRPM;
     }
 
-    public void setTargetPose(Translation2d newTarget) {
+    public void setTargetPose(Pose2d newTarget) {
         this.targetPose = newTarget;
     }
 

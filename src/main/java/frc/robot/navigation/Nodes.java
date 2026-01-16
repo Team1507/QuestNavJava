@@ -197,4 +197,30 @@ public final class Nodes {
         public static final Pose2d RIGHT =
                 new Pose2d(PARK_X, 6.200, Rotation2d.fromDegrees(180.0));
     }
+
+    // ============================
+    // Alliance Zone (Red)
+    // ============================
+    public static final class AllianceZoneRed {
+
+        public static final Pose2d LEFT =
+                new Pose2d(15.0, 2.000, Rotation2d.fromDegrees(180.0));
+        public static final Pose2d CENTER =
+                new Pose2d(15.0, 4.115, Rotation2d.fromDegrees(180.0));
+        public static final Pose2d RIGHT =
+                new Pose2d(15.0, 6.200, Rotation2d.fromDegrees(180.0));
+    }    
+
+    // ============================
+    // Alliance Zone (Blue)
+    // ============================
+    public static final class AllianceZoneBlue {
+
+        public static final Pose2d LEFT =
+                new Pose2d(1.0, 2.000, Rotation2d.fromDegrees(0.0));
+        public static final Pose2d CENTER =
+                new Pose2d(1.0, 4.115, Rotation2d.fromDegrees(0.0));
+        public static final Pose2d RIGHT =
+                new Pose2d(1.0, 6.200, Rotation2d.fromDegrees(0.0));
+    }    
 }

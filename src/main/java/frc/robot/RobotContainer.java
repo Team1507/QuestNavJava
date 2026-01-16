@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 // Robot Commands
@@ -24,15 +25,22 @@ import frc.robot.subsystems.ShooterSubsystem;
 
 // Robot Constants
 import static frc.robot.Constants.IO.*;
-import static frc.robot.Constants.MoveToPose.*;
 import static frc.robot.Constants.Speed.*;
-import static frc.robot.Constants.FieldElements.*;
+import static frc.robot.Constants.Shooter.*;
 
 // Shooter model imports
 import frc.robot.shooter.data.PoseSupplier;
 import frc.robot.shooter.data.ShotTrainer;
 import frc.robot.shooter.model.ModelLoader;
 import frc.robot.shooter.model.ShooterModel;
+
+// Nodes
+import frc.robot.navigation.Nodes.Hub;
+import frc.robot.navigation.Nodes.AllianceZoneBlue;
+import frc.robot.navigation.Nodes.AllianceZoneRed;
+
+// Autos
+import frc.robot.auto.routines.OnePieceAuto;
 
 // Robot Extra
 import frc.robot.generated.TunerConstants;
@@ -67,21 +75,25 @@ public class RobotContainer {
                 new TalonFX(SHOOTER_CAN_ID),
                 shooterModelConfig,
                 poseSupplier,
-                HUB_POSE // default target
+                Hub.CENTER // default target
             );
 
         public final ShotTrainer shotTrainer =
             new ShotTrainer(
                 shooterSubsystem.getShooterMotor(),
                 poseSupplier,
-                HUB_POSE
+                Hub.CENTER.getTranslation()
             );    
 
     // -----------------------------
+    // Autos
+    // -----------------------------
+    private final SendableChooser<Command> autoChooser = new SendableChooser<>();
 
     public RobotContainer() {
         configureBindings();
         configureShooterDefault();
+        configureAutoChooser();
     }
 
     /**
@@ -137,7 +149,7 @@ public class RobotContainer {
             .onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
 
         // Motion
-        joystick.a().onTrue(new CmdMoveRRT(drivetrain, POSE_A));
+        joystick.a().onTrue(new CmdMoveRRT(drivetrain, Hub.APPROACH_FRONT));
 
         joystick.b().onTrue(drivetrain.runOnce(() -> {
             CommandScheduler.getInstance().cancelAll();
@@ -146,28 +158,28 @@ public class RobotContainer {
         // Shooter Target Update
         // Right bumper → shoot at HUB_POSE
         joystick.rightBumper().onTrue(
-            Commands.runOnce(() -> shooterSubsystem.setTargetPose(HUB_POSE))
+            Commands.runOnce(() -> shooterSubsystem.setTargetPose(Hub.APPROACH_FRONT))
         );
 
         // Right trigger → shoot at SHOT_A_POSE
         joystick.rightTrigger().onTrue(
-            Commands.runOnce(() -> shooterSubsystem.setTargetPose(SHOT_A_POSE))
+            Commands.runOnce(() -> shooterSubsystem.setTargetPose(AllianceZoneBlue.LEFT))
         );
 
         // Left trigger → shoot at SHOT_B_POSE
         joystick.leftTrigger().onTrue(
-            Commands.runOnce(() -> shooterSubsystem.setTargetPose(SHOT_B_POSE))
+            Commands.runOnce(() -> shooterSubsystem.setTargetPose(AllianceZoneBlue.RIGHT))
         );
 
         // Shooter sim visualization
         joystick.rightBumper().onTrue(
-            new FuelSimulator(shooterSubsystem, poseSupplier, shotTrainer, HUB_POSE)
+            new FuelSimulator(shooterSubsystem, poseSupplier, shotTrainer, Hub.APPROACH_FRONT.getTranslation())
         );
         joystick.rightTrigger().onTrue(
-            new FuelSimulator(shooterSubsystem, poseSupplier, shotTrainer, SHOT_A_POSE)
+            new FuelSimulator(shooterSubsystem, poseSupplier, shotTrainer, AllianceZoneBlue.LEFT.getTranslation())
         );
         joystick.leftTrigger().onTrue(
-            new FuelSimulator(shooterSubsystem, poseSupplier, shotTrainer, SHOT_B_POSE)
+            new FuelSimulator(shooterSubsystem, poseSupplier, shotTrainer, AllianceZoneBlue.RIGHT.getTranslation())
         );
 
         // Vision pose reset
@@ -180,13 +192,31 @@ public class RobotContainer {
         // PID Tuner
         SmartDashboard.putData( 
             "Run Shooter PID Tuner",
-            new CmdShooterPIDTuner(shooterSubsystem, 4095) // max RPM here
+            new CmdShooterPIDTuner(shooterSubsystem, MAX_RPM) // max RPM here
         );
     }
 
+    private void configureAutoChooser() {
+
+        // Default auto
+        autoChooser.setDefaultOption(
+            "Auto Do Nothing",
+            Commands.print("Doing nothing")
+        );
+    
+        // Example autos using your new builder
+        autoChooser.addOption(
+            "One Piece Auto",
+            OnePieceAuto.build(drivetrain)
+        );
+    
+        // Publish to dashboard
+        SmartDashboard.putData("Auto Mode", autoChooser);
+    }    
+
     public Command getAutonomousCommand() {
-        return Commands.print("No autonomous command configured");
-    }
+        return autoChooser.getSelected();
+    }    
 
     private double applyDeadband(double value, double deadband) {
         return (Math.abs(value) < deadband) ? 0.0 : value;

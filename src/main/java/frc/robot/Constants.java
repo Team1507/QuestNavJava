@@ -153,9 +153,6 @@ public final class Constants {
         // Controllers
         public static final int JOYSTICK_PORT = 0;
 
-        // Motors
-        public static final int SHOOTER_CAN_ID = 0;
-
         // Photon Vision
         public static final Transform3d CAMERA_TO_ROBOT =
             new Transform3d(
@@ -169,6 +166,14 @@ public final class Constants {
             0.02,  // 2 cm Y
             0.035  // ~2 degrees
         );
+    }
+
+    public static final class Shooter {
+        // Motors
+        public static final int SHOOTER_CAN_ID = 0;
+
+        // MAX RPM
+        public static final double MAX_RPM = 4000;
     }
 
     public static final class Quest {
