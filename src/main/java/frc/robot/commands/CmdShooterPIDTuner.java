@@ -190,7 +190,7 @@ public class CmdShooterPIDTuner extends Command {
         double t = now - startTime;
 
         double setpoint = computeSetpoint(t);
-        shooter.setTargetRPM(setpoint);
+        shooter.setTargetRPS(setpoint);
 
         samples.add(new Sample(
             t,
@@ -448,7 +448,7 @@ public class CmdShooterPIDTuner extends Command {
             // Final slow drop to zero
             // -----------------------------
             case DONE:
-                shooter.setTargetRPM(0); 
+                shooter.setTargetRPS(0); 
                 fullReport.append("=== Shooter PID Tuning Test Complete ===\n");
                 break;
                 

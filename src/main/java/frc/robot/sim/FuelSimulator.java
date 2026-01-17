@@ -55,7 +55,7 @@ public class FuelSimulator extends Command {
             : new Translation2d(0, 0);
 
         // Convert RPM → landing distance
-        double rpm = shooter.getTargetRPM();
+        double rpm = shooter.getTargetRPS();
         double speed = rpm * 0.0012;     // m/s
         double flightTime = 1.0;         // tune this constant
         double distance = speed * flightTime;

@@ -30,7 +30,7 @@ public class ShooterSubsystem extends SubsystemBase {
     private final PoseSupplier poseSupplier;
     private Pose2d targetPose;
 
-    private double targetRPM = 0.0;
+    private double targetRPS = 0.0;
 
     // -----------------------------
     // Simulation fields
@@ -58,14 +58,14 @@ public class ShooterSubsystem extends SubsystemBase {
     // -----------------------------
     private void configurePID() {
         TalonFXConfiguration cfg = new TalonFXConfiguration();
-        // Slot0 PID values (starting point)
+        // Slot0 PID values
         cfg.Slot0.kP = 0.10;
         cfg.Slot0.kI = 0.0;
         cfg.Slot0.kD = 0.0;
-        // Optional: feedforward (helps shooters a LOT)
+        // Slot0 Feedforward values
         cfg.Slot0.kV = 0.12;
-        // adjust later
         cfg.Slot0.kS = 0.0;
+        cfg.Slot0.kA = 0.0;
         shooterMotor.getConfigurator().apply(cfg);
     }
 
@@ -92,13 +92,13 @@ public class ShooterSubsystem extends SubsystemBase {
     public double getShooterRPM() {
         return simulate
             ? simulatedRPM
-            : shooterMotor.getVelocity().getValueAsDouble();
+            : shooterMotor.getVelocity().getValueAsDouble() * 60;
     }
 
     public double getShooterVoltage() {
         if (simulate) {
             // Fake voltage proportional to effort
-            return 12.0 * Math.min(1.0, Math.abs(targetRPM) / 5000.0);
+            return 12.0 * Math.min(1.0, Math.abs(targetRPS) / 83.33);
         }
         return shooterMotor.getMotorVoltage().getValueAsDouble();
     }
@@ -118,7 +118,7 @@ public class ShooterSubsystem extends SubsystemBase {
     }
 
     public double getClosedLoopError() {
-        return targetRPM - getShooterRPM();
+        return (targetRPS * 60) - getShooterRPM();
     }
 
     // -----------------------------
@@ -152,15 +152,12 @@ public class ShooterSubsystem extends SubsystemBase {
     // Shooter control
     // -----------------------------
     public void setTargetRPM(double rpm) {
-        this.targetRPM = rpm;
-
-        if (!simulate) {
-            shooterMotor.setControl(velocityRequest.withVelocity(rpm));
-        }
+        // velocity control takes RPS not RPM, so need to convert RPM to RPS
+        this.targetRPS = rpm / 60;
     }
 
     public double getTargetRPM() {
-        return targetRPM;
+        return targetRPS * 60;
     }
 
     public void setTargetPose(Pose2d newTarget) {
@@ -179,10 +176,10 @@ public class ShooterSubsystem extends SubsystemBase {
         if (simulate) {
             // Simple flywheel simulation: exponential approach
             double alpha = 0.10; // responsiveness factor
-            simulatedRPM += (targetRPM - simulatedRPM) * alpha;
+            simulatedRPM += ((targetRPS * 60) - simulatedRPM) * alpha;
         } else {
             // Real hardware control
-            shooterMotor.setControl(velocityRequest.withVelocity(targetRPM));
+            shooterMotor.setControl(velocityRequest.withVelocity(targetRPS));
         }
     }
 }
