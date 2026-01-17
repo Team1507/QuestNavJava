@@ -92,6 +92,7 @@ public class CmdShooterPIDTuner extends Command {
     private final List<Sample> samples = new ArrayList<>();
     private final StringBuilder fullReport = new StringBuilder();
     private final List<String> phaseSuggestions = new ArrayList<>();
+    private final List<String> phaseFfSuggestions = new ArrayList<>();
     private double testStartTime;
 
     private double maxOvershootSeen = 0;
@@ -155,8 +156,16 @@ public class CmdShooterPIDTuner extends Command {
         nextPhaseAfterSlowDown = Phase.FAST_SPIKE_MAX;
         configurePhase();
 
-        fullReport.setLength(0); // clear previous run
-        fullReport.append("=== Shooter PID Tuning Test Starting ===\n\n");
+        // clear previous run 
+        fullReport.setLength(0); 
+        fullReport.append("=== Shooter PID + Feedforward Tuning Test Starting ===\n\n");
+        phaseSuggestions.clear();
+        phaseFfSuggestions.clear();
+        maxOvershootSeen = 0;
+        totalRiseTime = 0;
+        riseTimeCount = 0;
+        totalSettlingTime = 0;
+        settlingTimeCount = 0;
     }
 
     // -----------------------------
@@ -468,7 +477,6 @@ public class CmdShooterPIDTuner extends Command {
             .max().orElse(setpoint);
 
         double overshoot = Math.max(0, maxRpmSeen - setpoint);
-
         maxOvershootSeen = Math.max(maxOvershootSeen, overshoot);
 
         // Rise time
@@ -540,8 +548,16 @@ public class CmdShooterPIDTuner extends Command {
             oscDuration,
             setpoint
         );
-
         phaseSuggestions.add(suggestion);
+
+        // Feedforward suggestion 
+        String ffSuggestion = generateFfSuggestion( 
+            samples,
+            setpoint,
+            overshoot,
+            riseTime
+        ); 
+        phaseFfSuggestions.add(ffSuggestion);
 
         // Print report
         fullReport.append("=== Shooter PID Phase Report ===\n");
@@ -552,7 +568,8 @@ public class CmdShooterPIDTuner extends Command {
         fullReport.append("  Settling time: ").append(settlingTime).append(" s\n");
         fullReport.append("  Oscillation duration: ").append(oscDuration)
                 .append(" s (").append(crossings).append(" crossings)\n");
-        fullReport.append("  Recommendation: ").append(suggestion).append("\n");
+        fullReport.append(" PID Recommendation: ").append(suggestion).append("\n");
+        fullReport.append(" Feedforward Recommendation: ").append(ffSuggestion).append("\n");
         fullReport.append("--------------------------------\n\n");
     }
 
@@ -579,9 +596,11 @@ public class CmdShooterPIDTuner extends Command {
         fullReport.append("  Kp: ").append(cfg.Slot0.kP).append("\n");
         fullReport.append("  Ki: ").append(cfg.Slot0.kI).append("\n");
         fullReport.append("  Kd: ").append(cfg.Slot0.kD).append("\n\n");
+
         fullReport.append("Feedforward Values Used:\n");
-        fullReport.append("  Kv: ").append(cfg.Slot0.kV).append("\n");
-        fullReport.append("  Ks: ").append(cfg.Slot0.kS).append("\n\n");
+        fullReport.append("  kV: ").append(cfg.Slot0.kV).append("\n");
+        fullReport.append("  kS: ").append(cfg.Slot0.kS).append("\n");
+        fullReport.append("  kA: ").append(cfg.Slot0.kA).append("\n\n");
     
         fullReport.append("Overall Observations:\n");
         fullReport.append("  - Max overshoot observed: ").append(maxOvershootSeen).append(" RPM\n");
@@ -595,6 +614,9 @@ public class CmdShooterPIDTuner extends Command {
 
         fullReport.append("Overall PID Recommendation:\n");
         fullReport.append("  ").append(computeOverallPidRecommendation()).append("\n\n");
+
+        fullReport.append("Overall Feedforward Recommendation:\n"); 
+        fullReport.append(" ").append(computeOverallFfRecommendation()).append("\n\n");
 
         fullReport.append("=== End of Report ===\n");
     }
@@ -661,6 +683,117 @@ public class CmdShooterPIDTuner extends Command {
     }
 
     /**
+     * Generates a feedforward tuning recommendation based on
+     * steady-state behavior, acceleration behavior, and voltage usage.
+     *
+     * Heuristics:
+     *  - kS: handles static friction and low-speed hesitation
+     *  - kV: handles steady-state voltage vs RPM
+     *  - kA: handles acceleration voltage vs acceleration rate
+     */
+    private String generateFfSuggestion(
+        List<Sample> samples,
+        double setpoint,
+        double overshoot,
+        double riseTime
+    ) {
+        if (samples.isEmpty() || setpoint <= 0) {
+            return "Insufficient data for feedforward analysis.";
+        }
+
+        double maxVoltage = 0;
+        double avgVoltage = 0;
+
+        // For kS detection
+        boolean lowSpeedHesitation = false;
+
+        // For kA detection
+        double maxAccel = 0;
+        double maxAccelVoltage = 0;
+
+        // For kV detection
+        double sumVoltInBand = 0;
+        int countInBand = 0;
+
+        double prevRpm = samples.get(0).rpm;
+        double prevTime = samples.get(0).t;
+
+        for (Sample s : samples) {
+            maxVoltage = Math.max(maxVoltage, s.voltage);
+            avgVoltage += s.voltage;
+
+            // kS detection: shooter hesitates near zero RPM
+            if (s.setpoint > 200 && s.rpm < 100 && s.voltage > 2.0) {
+                lowSpeedHesitation = true;
+            }
+
+            // kV detection: steady-state voltage once in tolerance band
+            if (Math.abs(s.rpm - setpoint) <= rpmTolerance) {
+                sumVoltInBand += s.voltage;
+                countInBand++;
+            }
+
+            // kA detection: acceleration vs voltage
+            double dt = s.t - prevTime;
+            if (dt > 0) {
+                double accel = (s.rpm - prevRpm) / dt;
+                if (accel > maxAccel) {
+                    maxAccel = accel;
+                    maxAccelVoltage = s.voltage;
+                }
+            }
+
+            prevRpm = s.rpm;
+            prevTime = s.t;
+        }
+
+        avgVoltage /= samples.size();
+        double steadyVoltage = (countInBand > 0) ? (sumVoltInBand / countInBand) : avgVoltage;
+        double overshootPct = overshoot / Math.max(setpoint, 1);
+
+        // -----------------------------
+        // kS Heuristics
+        // -----------------------------
+        if (lowSpeedHesitation) {
+            return "Increase kS slightly: shooter hesitates at low RPM and requires extra voltage to break static friction.";
+        }
+
+        // -----------------------------
+        // kA Heuristics
+        // -----------------------------
+        // If voltage is high but acceleration is low → kA too low
+        if (maxAccelVoltage > 10.0 && maxAccel < (setpoint * 0.5)) {
+            return "Increase kA: voltage is high during acceleration but RPM is not increasing quickly.";
+        }
+
+        // If acceleration is extremely sharp → kA too high
+        if (maxAccel > (setpoint * 1.2)) {
+            return "Reduce kA: acceleration spike is too aggressive.";
+        }
+
+        // -----------------------------
+        // kV Heuristics
+        // -----------------------------
+        // Slow rise time + low voltage → kV too low
+        if (riseTime > 0.8 && maxVoltage < 10.0) {
+            return "Increase kV: shooter is slow to reach speed and voltage is not saturated.";
+        }
+
+        // Overshoot even with moderate voltage → kV too high
+        if (overshootPct > 0.10 && steadyVoltage > 6.0) {
+            return "Reduce kV: feedforward may be pushing the shooter past the target.";
+        }
+
+        // High voltage while already near/above target
+        if (steadyVoltage > 9.0 && overshootPct > 0.05) {
+            return "Reduce kV: voltage remains high even when RPM is at or above target.";
+        }
+
+        return "Feedforward appears reasonable for this phase.";
+    }
+
+
+    /**
      * Computes an overall PID recommendation by analyzing the
      * frequency of per-phase suggestions and selecting the most
      * commonly occurring one.
@@ -690,5 +823,35 @@ public class CmdShooterPIDTuner extends Command {
         }
 
         return best != null ? best : "No PID recommendation available.";
+    }
+
+    /**
+     * Computes an overall Feedforward recommendation by analyzing the
+     * frequency of per-phase suggestions and selecting the most
+     * commonly occurring one.
+     *
+     * @return summarized FF recommendation for the entire test
+     */
+    private String computeOverallFfRecommendation() {
+        if (phaseFfSuggestions.isEmpty()) {
+            return "No feedforward recommendation available.";
+        }
+
+        java.util.Map<String, Integer> counts = new java.util.HashMap<>();
+        for (String s : phaseFfSuggestions) {
+            counts.put(s, counts.getOrDefault(s, 0) + 1);
+        }
+
+        String best = null;
+        int bestCount = 0;
+
+        for (var entry : counts.entrySet()) {
+            if (entry.getValue() > bestCount) {
+                best = entry.getKey();
+                bestCount = entry.getValue();
+            }
+        }
+
+        return best != null ? best : "No feedforward recommendation available.";
     }
 }
